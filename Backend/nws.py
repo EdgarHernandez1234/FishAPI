@@ -58,35 +58,26 @@ def extract_pressure_readings(observations: list[dict]) -> list[dict]:
 
 # Main execution block to demonstrate the usage of the functions
 if __name__ == "__main__":
-    spot = SPOTS[0]  # Lake Balboa
-    point_data = get_point_data(spot["latitude"], spot["longitude"])
-    stations_url = point_data["properties"]["observationStations"]
-    stations = get_observation_stations(stations_url)
+    for spot in SPOTS:  # Lake Balboa and Hansen Dam
+        point_data = get_point_data(spot["latitude"], spot["longitude"])
+        stations_url = point_data["properties"]["observationStations"]
+        stations = get_observation_stations(stations_url)
 
-    print("Spot:", spot["name"])
-    print("Candidate stations:", len(stations))
+        print("\nSpot:", spot["name"])
+        print("Candidate stations:", len(stations))
 
-    for station in stations[:5]:
-        details = station["properties"]
-        coordinates = station["geometry"]["coordinates"]
-        print(details["stationIdentifier"], "|", details["name"], "|", coordinates)
-        station_id = stations[0]["properties"]["stationIdentifier"]
-    observations = get_recent_observations(station_id)
+        if not stations:
+            print("No observation stations found.")
+            continue
 
-    print("Checking pressure at station:", station_id)
-    print("Observations returned:", len(observations))
+        station = stations[0]
+        station_id = station["properties"]["stationIdentifier"]
+        print("Checking station:", station_id, "-", station["properties"]["name"])
 
-    for observation in observations[:10]:
-        details = observation["properties"]
-        pressure = details.get("barometricPressure") or {}
+        observations = get_recent_observations(station_id)
+        readings = extract_pressure_readings(observations)
 
-        print(
-            details.get("timestamp"),
-            "| pressure:",
-            pressure.get("value"),
-            pressure.get("unitCode"),
-        )
-    readings = extract_pressure_readings(observations)
-    print("Usable pressure readings:", len(readings))
-    print("Earliest:", readings[0] if readings else None)
-    print("Latest:", readings[-1] if readings else None)
+        print("Observations returned:", len(observations))
+        print("Usable pressure readings:", len(readings))
+        print("Earliest:", readings[0] if readings else None)
+        print("Latest:", readings[-1] if readings else None)
