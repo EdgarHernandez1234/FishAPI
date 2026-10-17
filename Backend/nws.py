@@ -41,6 +41,7 @@ def extract_pressure_readings(observations: list[dict]) -> list[dict]:
 
     return sorted(readings, key=lambda reading: reading["timestamp"])
 
+# Function to get pressure data for a specific spot
 def get_pressure_data_for_spot(spot: dict) -> dict:
     station = {
         "id": spot["station_id"],
