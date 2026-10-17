@@ -56,28 +56,56 @@ def extract_pressure_readings(observations: list[dict]) -> list[dict]:
 
     return sorted(readings, key=lambda reading: reading["timestamp"])
 
-# Main execution block to demonstrate the usage of the functions
-if __name__ == "__main__":
-    for spot in SPOTS:  # Lake Balboa and Hansen Dam
-        point_data = get_point_data(spot["latitude"], spot["longitude"])
-        stations_url = point_data["properties"]["observationStations"]
-        stations = get_observation_stations(stations_url)
+def get_pressure_data_for_spot(spot: dict) -> dict:
+    point_data = get_point_data(spot["latitude"], spot["longitude"])
+    stations_url = point_data["properties"]["observationStations"]
+    stations = get_observation_stations(stations_url)
 
-        print("\nSpot:", spot["name"])
-        print("Candidate stations:", len(stations))
+    for station in stations[:3]:
+        station_details = station["properties"]
+        station_id = station_details["stationIdentifier"]
 
-        if not stations:
-            print("No observation stations found.")
+        try:
+            observations = get_recent_observations(station_id)
+        except httpx.HTTPError:
             continue
 
-        station = stations[0]
-        station_id = station["properties"]["stationIdentifier"]
-        print("Checking station:", station_id, "-", station["properties"]["name"])
-
-        observations = get_recent_observations(station_id)
         readings = extract_pressure_readings(observations)
 
-        print("Observations returned:", len(observations))
-        print("Usable pressure readings:", len(readings))
-        print("Earliest:", readings[0] if readings else None)
-        print("Latest:", readings[-1] if readings else None)
+        if len(readings) < 3:
+            continue
+
+        station_longitude, station_latitude = station["geometry"]["coordinates"][:2]
+
+        return {
+            "status": "ok",
+            "spot": spot,
+            "station": {
+                "id": station_id,
+                "name": station_details["name"],
+                "latitude": station_latitude,
+                "longitude": station_longitude,
+            },
+            "pressureField": "barometricPressure",
+            "readings": readings,
+        }
+
+    return {
+        "status": "pressure_unavailable",
+        "spot": spot,
+        "station": None,
+        "pressureField": "barometricPressure",
+        "readings": [],
+    }
+
+# Main execution block to demonstrate the usage of the functions
+if __name__ == "__main__":
+    for spot in SPOTS:
+        result = get_pressure_data_for_spot(spot)
+
+        print(
+            result["spot"]["name"],
+            "| status:", result["status"],
+            "| station:", result["station"]["id"] if result["station"] else None,
+            "| readings:", len(result["readings"]),
+        )
