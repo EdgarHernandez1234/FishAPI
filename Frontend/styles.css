@@ -1,0 +1,202 @@
+:root {
+    --color-primary-background: white;
+    --color-day-border: #e0e0e0;
+    --color-day-border-hover: #999999;
+
+    --search-button: #2563eb;
+
+    --box-shadow: rgba(0, 0, 0, 0.06);
+
+    --empty-bar-portion-cover: #e5e7eb;
+
+    /* These need to be tweaked a bit */
+    --color-ten:#16a34a;
+    --color-nine:#10b64d;
+    --color-eight:#65a30d;
+    --color-seven:#84a40c;
+    --color-six:#b4ff29;
+    --color-five:#e9ec14;
+    --color-four:#ecda14;
+    --color-three:#ea990c;
+    --color-two:#ea380c;
+    --color-one:#dc2626;
+}
+
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: var(--color-primary-background);
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0px 15px;
+}
+
+.search-box{
+    width: 100%;
+    max-width: 750px;
+    margin: 20px auto 70px auto;
+}
+
+.search-wrapper{
+    display: flex;
+    align-items: center;
+    background-color: var(--color-primary-background);
+    border: 1px solid var(--color-day-border);
+    border-radius: 1000px;
+    box-shadow: 0px 4px 12px var(--box-shadow);
+    padding: 10px 10px 10px 24px;
+    transition: all 0.2s ease-in-out;
+}
+
+.search-wrapper input{
+    flex: 1;
+    height: 40px;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+}
+
+.search-wrapper button{
+    height: 44px;
+    padding: 0px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 1000px;
+    background-color: var(--search-button);
+    color: var(--color-primary-background);
+    cursor: pointer;
+}
+
+h1 {
+    margin: 0;
+}
+
+header h1 {
+    font-size: 30px;
+    margin-bottom: 25px;
+}
+
+#Date-Blocks {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    background-color: var(--color-primary-background);
+    border: 1px solid --color-day-border;
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px var(--box-shadow);
+    cursor: pointer;
+}
+
+.day:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-day-border);
+}
+
+#today {
+    border: 2px solid --color-eight;
+}
+
+.date {
+    font-size: 14px;
+    font-weight: normal;
+    color: black;
+}
+
+.score {
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+#ten { color: var(--color-ten); }
+#nine { color: var(--color-nine); }
+#eight { color: var(--color-eight); }
+#seven { color: var(--color-seven); }
+#six { color: var(--color-six); }
+#five { color: var(--color-five); }
+#four { color: var(--color-four); }
+#three { color: var(--color-three); }
+#two { color: var(--color-two); }
+#one { color: var(--color-one); }
+
+
+#Main-Blocks {
+    background-color: var(--color-primary-background);
+    border: 1px solid --color-primary-background-border;
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px var(--box-shadow);
+    padding: 30px;
+}
+
+#line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+}
+
+#line h1:first-child {
+    font-size: 72px;
+    color: var(--color-eight);
+    margin-right: 20px;
+}
+
+#line h1:last-child {
+    font-size: 22px;
+    font-weight: normal;
+}
+
+#Sub-Rating-Blocks {
+    margin-top: 35px;
+}
+
+.rating {
+    background-color: var(--color-primary-background);
+    border: 1px solid var(--color-primary-background);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+
+.rating h1 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.bar {
+    height: 6px;
+    background-color: var(--empty-bar-portion-cover);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    border-radius: 10px;
+    animation-name: grow;
+    animation-duration: 1s;
+}
+
+#pressure { width: 80%; background-color: var(--color-eight); }
+#temperature { width: 50%; background-color: var(--color-five); }
+#clouds { width: 30%; background-color: var(--color-three); }
+#rain { width: 10%; background-color: var(--color-one); }
+#surf { width: 100%; background-color: var(--color-ten); }
+
+
+@keyframes grow {
+    from { width: 0%; }
+}
+
