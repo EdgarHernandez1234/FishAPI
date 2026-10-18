@@ -1,6 +1,8 @@
+import math
+
 def score_wind(speed_mph: float) -> int:
     """Return a 0-100 fishing score for wind speed in ___."""
-    if speed_mph < 0:
+    if not math.isfinite(speed_mph) or speed_mph < 0:
         raise ValueError("Wind speed cannot be negative")
 
     if speed_mph < 5:

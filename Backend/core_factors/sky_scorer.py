@@ -1,4 +1,3 @@
-
 def score_sky(cloud_cover_pct: float) -> int:
     #returns score for cloud cover percentage (how clear the sky is)
     if not 0<= cloud_cover_pct <= 100:
