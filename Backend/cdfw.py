@@ -1,0 +1,101 @@
+import httpx
+from spots import CSUN_LATITUDE, CSUN_LONGITUDE, MAX_DISTANCE_MILES
+import json
+from pathlib import Path
+
+CDFW_PLANTING_URL = (
+    "https://services2.arcgis.com/Uq9r85Potqm3MfRV/arcgis/rest/services/"
+    "biosds2897_fmu/FeatureServer/0/query"
+)
+
+def extract_candidate_waters(features: list[dict]) -> list[dict]:
+    unique_waters = {}
+
+    for feature in features:
+        details = feature["attributes"]
+        name = details.get("WaterName")
+        latitude = details.get("Lat")
+        longitude = details.get("Lon")
+
+        if not name or latitude is None or longitude is None:
+            continue
+
+        key = (name.strip().casefold(), latitude, longitude)
+        unique_waters.setdefault(key, {
+            "name": name,
+            "latitude": latitude,
+            "longitude": longitude,
+            "county": details.get("Counties"),
+        })
+
+    return list(unique_waters.values())
+
+def get_sample_planting_locations() -> list[dict]:
+    params = {
+    "where": "1=1",
+    "geometry": f"{CSUN_LONGITUDE},{CSUN_LATITUDE}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 4326,
+    "distance": MAX_DISTANCE_MILES,
+    "units": "esriSRUnit_StatuteMile",
+    "outFields": "WaterName,Lat,Lon,FishType,Counties,DfwWaterId",
+    "returnGeometry": "false",
+    "resultRecordCount": 2000,
+    "f": "json",
+    }
+
+    response = httpx.get(CDFW_PLANTING_URL, params=params, timeout=15.0)
+    response.raise_for_status()
+    data = response.json()
+
+    if "error" in data:
+        raise RuntimeError(f"CDFW query failed: {data['error']}")
+    if data.get("exceededTransferLimit"):
+        raise RuntimeError("CDFW returned more records than fit in one response")
+    return data["features"]
+
+def get_approved_cdfw_spots(candidates: list[dict]) -> list[dict]:
+    approved_spots = []
+
+    for water in candidates:
+        if water["name"].strip().casefold() != "rancho simi park lake":
+            continue
+
+        approved_spots.append({
+            "id": "rancho-simi-park-lake",
+            "name": water["name"],
+            "latitude": water["latitude"],
+            "longitude": water["longitude"],
+            "station_id": "SV",
+            "station_name": "Simi Valley - Cochran",
+            "station_latitude": 34.2764,
+            "station_longitude": -118.68375,
+            "source": "CDFW Planting Locations",
+        })
+
+    return approved_spots
+
+if __name__ == "__main__":
+    features = get_sample_planting_locations()
+    candidates = extract_candidate_waters(features)
+
+    print("Planting records:", len(features))
+    print("Distinct candidate waters:", len(candidates))
+
+    for water in candidates:
+        print(
+            water["name"],
+            "| county:", water["county"],
+            "| coordinates:", water["latitude"], water["longitude"],
+        )
+    approved_spots = get_approved_cdfw_spots(candidates)
+    print("Approved CDFW spots:", approved_spots)
+    if not approved_spots:
+        raise RuntimeError("No approved CDFW spots found; saved file was not changed")
+
+    output_path = Path(__file__).with_name("cdfw_approved_spots.json")
+    output_path.write_text(
+        json.dumps(approved_spots, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print("Saved approved spots to:", output_path)

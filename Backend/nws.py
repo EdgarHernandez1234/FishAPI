@@ -61,6 +61,36 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
         "readings": readings,
     }
 
+# Function to discover nearby weather stations based on latitude and longitude
+def discover_station_candidates(latitude: float, longitude: float) -> list[dict]:
+    point_url = f"https://api.weather.gov/points/{latitude:.4f},{longitude:.4f}"
+
+    point_response = httpx.get(
+        point_url, headers=NWS_HEADERS, timeout=15.0
+    )
+    point_response.raise_for_status()
+
+    stations_url = point_response.json()["properties"]["observationStations"]
+
+    stations_response = httpx.get(
+        stations_url, headers=NWS_HEADERS, timeout=15.0
+    )
+    stations_response.raise_for_status()
+
+    candidates = []
+    for feature in stations_response.json()["features"][:5]:
+        properties = feature["properties"]
+        station_longitude, station_latitude = feature["geometry"]["coordinates"][:2]
+
+        candidates.append({
+            "id": properties["stationIdentifier"],
+            "name": properties["name"],
+            "latitude": station_latitude,
+            "longitude": station_longitude,
+        })
+
+    return candidates
+
 # Main execution block to demonstrate the usage of the functions
 if __name__ == "__main__":
     for spot in SPOTS:

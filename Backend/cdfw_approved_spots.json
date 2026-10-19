@@ -1,0 +1,13 @@
+[
+  {
+    "id": "rancho-simi-park-lake",
+    "name": "Rancho Simi Park Lake",
+    "latitude": 34.2665,
+    "longitude": -118.763836,
+    "station_id": "SV",
+    "station_name": "Simi Valley - Cochran",
+    "station_latitude": 34.2764,
+    "station_longitude": -118.68375,
+    "source": "CDFW Planting Locations"
+  }
+]
