@@ -1,85 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fisch</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Fisch - Find the best days to fish using weather conditions and fishing bite scores.">
+
+    <title>Fisch | Fishing Forecast</title>
+
     <link rel="stylesheet" href="styles.css">
+
+    <script src="script.js" defer></script>
 </head>
+
 <body>
+
     <form class="search-box" action="/search" method="GET">
-        <div class="search-wrapper">    
-            <input type="text" name="q" placeholder="Input a city in California here" aria-label="Search">
-            
-            <button type="submit">Search</button>
+
+        <div class="search-wrapper">
+
+            <input
+                type="text"
+                name="q"
+                id="city-search"
+                placeholder="Input a city in California here"
+                aria-label="Search California cities"
+                autocomplete="address-level2"
+                required
+            >
+
+            <button type="submit">
+                Search
+            </button>
+
         </div>
+
     </form>
 
     <header>
+
         <h1>Bite Score</h1>
+
     </header>
 
-    <div id="Date-Blocks">
-        <div class="day" id="today">
-            <h1 class="date">Oct 16th</h1>
-            <span class="score" id="ten">10</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 17th</h1>
-            <span class="score" id="eight">8</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 18th</h1>
-            <span class="score" id="six">6</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 19th</h1>
-            <span class="score" id="five">5</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 20th</h1>
-            <span class="score" id="three">3</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 21st</h1>
-            <span class="score" id="one">1</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 22nd</h1>
-            <span class="score" id="seven">7</span>
-        </div>
-    </div>
+    <section
+        id="Date-Blocks"
+        aria-label="Seven day fishing forecast"
+    >
 
-    <div id="Main-Blocks">
-        <div id="Overall-Rating">
+        <div class="day" id="today">
+
+            <h1 class="date">Oct 19</h1>
+
+            <span class="score" id="eight">
+                8
+            </span>
+
+        </div>
+
+        <div class="day">
+
+            <h1 class="date">Oct 20</h1>
+
+            <span class="score" id="six">
+                6
+            </span>
+
+        </div>
+
+        <div class="day">
+
+            <h1 class="date">Oct 21</h1>
+
+            <span class="score" id="seven">
+                7
+            </span>
+
+        </div>
+
+        <div class="day">
+
+            <h1 class="date">Oct 22</h1>
+
+            <span class="score" id="five">
+                5
+            </span>
+
+        </div>
+
+        <div class="day">
+
+            <h1 class="date">Oct 23</h1>
+
+            <span class="score" id="nine">
+                9
+            </span>
+
+        </div>
+
+        <div class="day">
+
+            <h1 class="date">Oct 24</h1>
+
+            <span class="score" id="four">
+                4
+            </span>
+
+        </div>
+
+        <div class="day">
+
+            <h1 class="date">Oct 25</h1>
+
+            <span class="score" id="seven">
+                7
+            </span>
+
+        </div>
+
+    </section>
+
+    <main id="Main-Blocks">
+
+        <section
+            id="Overall-Rating"
+            aria-label="Overall fishing rating"
+        >
+
             <div id="line">
+
                 <h1>8/10</h1>
+
                 <h1>Great day to fish</h1>
+
             </div>
-        </div>
-        <div id="Sub-Rating-Blocks">
+
+        </section>
+
+        <section
+            id="Sub-Rating-Blocks"
+            aria-label="Fishing weather conditions"
+        >
+
             <div class="rating">
+
                 <h1>Pressure</h1>
-                <div class="bar"><div class="fill" id="pressure"></div></div>
+
+                <div class="bar">
+
+                    <div
+                        class="fill"
+                        id="pressure"
+                    ></div>
+
+                </div>
+
             </div>
+
             <div class="rating">
+
                 <h1>Temperature</h1>
-                <div class="bar"><div class="fill" id="temperature"></div></div>
+
+                <div class="bar">
+
+                    <div
+                        class="fill"
+                        id="temperature"
+                    ></div>
+
+                </div>
+
             </div>
+
             <div class="rating">
+
                 <h1>Clouds</h1>
-                <div class="bar"><div class="fill" id="clouds"></div></div>
+
+                <div class="bar">
+
+                    <div
+                        class="fill"
+                        id="clouds"
+                    ></div>
+
+                </div>
+
             </div>
+
             <div class="rating">
+
                 <h1>Rain</h1>
-                <div class="bar"><div class="fill" id="rain"></div></div>
+
+                <div class="bar">
+
+                    <div
+                        class="fill"
+                        id="rain"
+                    ></div>
+
+                </div>
+
             </div>
+
             <div class="rating">
+
                 <h1>Surf</h1>
-                <div class="bar"><div class="fill" id="surf"></div></div>
+
+                <div class="bar">
+
+                    <div
+                        class="fill"
+                        id="surf"
+                    ></div>
+
+                </div>
+
             </div>
-        </div>
-    </div>
+
+
+        </section>
+
+    </main>
 
 </body>
+
 </html>
