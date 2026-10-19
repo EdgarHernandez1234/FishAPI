@@ -11,5 +11,3 @@ https://www.weather.gov/documentation/services-web-api?
 
 to look for possible fishing locations
 https://data.ca.gov/@california-department-of-fish-and-wildlife/cdfw-fishing-guide2
-
-Most location data adapted from CDFW Planting Locations, licensed under CC BY 4.0. We filtered and reviewed locations for this app.
