@@ -54,27 +54,44 @@ def get_sample_planting_locations() -> list[dict]:
         raise RuntimeError("CDFW returned more records than fit in one response")
     return data["features"]
 
-def get_approved_cdfw_spots(candidates: list[dict]) -> list[dict]:
-    approved_spots = []
-
-    for water in candidates:
-        if water["name"].strip().casefold() != "rancho simi park lake":
-            continue
-
-        approved_spots.append({
+def get_approved_cdfw_spots(candidates):
+    approved_stations = {
+        "rancho simi park lake": {
             "id": "rancho-simi-park-lake",
-            "name": water["name"],
-            "latitude": water["latitude"],
-            "longitude": water["longitude"],
             "station_id": "SV",
             "station_name": "Simi Valley - Cochran",
             "station_latitude": 34.2764,
             "station_longitude": -118.68375,
+        },
+        "kenneth hahn lake": {
+            "id": "kenneth-hahn-lake",
+            "station_id": "KSMO",
+            "station_name": "Santa Monica, Santa Monica Municipal Airport",
+            "station_latitude": 34.01583,
+            "station_longitude": -118.45139,
+        },
+    }
+
+    approved = []
+
+    for candidate in candidates:
+        station = approved_stations.get(candidate["name"].strip().casefold())
+        if station is None:
+            continue
+
+        approved.append({
+            "id": station["id"],
+            "name": candidate["name"],
+            "latitude": candidate["latitude"],
+            "longitude": candidate["longitude"],
+            "station_id": station["station_id"],
+            "station_name": station["station_name"],
+            "station_latitude": station["station_latitude"],
+            "station_longitude": station["station_longitude"],
             "source": "CDFW Planting Locations",
         })
 
-    return approved_spots
-
+    return approved
 if __name__ == "__main__":
     features = get_sample_planting_locations()
     candidates = extract_candidate_waters(features)
