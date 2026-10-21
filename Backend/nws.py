@@ -24,25 +24,41 @@ def get_recent_observations(station_id: str, hours: int = 12) -> list[dict]:
     response.raise_for_status()
     return response.json()["features"]
 
+
 def extract_pressure_readings(observations: list[dict]) -> list[dict]:
     readings = []
 
     for observation in observations:
-        details = observation["properties"]
-        pressure = details.get("barometricPressure") or {}
+        props = observation.get("properties", {})
+        pressure = props.get("barometricPressure") or {}
+        value = pressure.get("value")
 
-        if pressure.get("value") is None:
+        if value is None:
+            continue
+
+        unit_code = pressure.get("unitCode", "")
+
+        # NWS commonly reports barometric pressure in pascals.
+        if unit_code.endswith(":Pa") or unit_code == "Pa":
+            value_hpa = float(value) / 100
+        elif unit_code.endswith(":hPa") or unit_code == "hPa":
+            value_hpa = float(value)
+        else:
+            # Do not guess if the API reports an unexpected unit.
+            continue
+
+        timestamp = props.get("timestamp")
+        if not timestamp:
             continue
 
         readings.append({
-            "timestamp": details["timestamp"],
-            "value": pressure["value"],
-            "unitCode": pressure.get("unitCode"),
+            "timestamp": timestamp,
+            "pressure_hpa": value_hpa,
         })
 
-    return sorted(readings, key=lambda reading: reading["timestamp"])
+    return sorted(readings, key=lambda r: r["timestamp"])
 
-# Function to get pressure data for a specific spot
+
 def get_pressure_data_for_spot(spot: dict) -> dict:
     station = {
         "id": spot["station_id"],
@@ -51,16 +67,61 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
         "longitude": spot["station_longitude"],
     }
 
-    observations = get_recent_observations(station["id"])
+    observations = get_recent_observations(station["id"], hours=12)
     readings = extract_pressure_readings(observations)
 
-    return {
-        "status": "ok" if len(readings) >= 3 else "pressure_unavailable",
+    result = {
+        "status": "pressure_unavailable",
         "spot": spot,
         "station": station,
         "pressureField": "barometricPressure",
+        "pressure_hpa": None,
+        "pressure_3h_ago_hpa": None,
+        "change_hpa_3h": None,
         "readings": readings,
     }
+
+    if len(readings) < 2:
+        return result
+
+    # Use the latest available observation as the current reference.
+    current = readings[-1]
+    current_time = datetime.fromisoformat(
+        current["timestamp"].replace("Z", "+00:00")
+    )
+
+    target_time = current_time - timedelta(hours=3)
+
+    # Find the reading closest to three hours before the latest reading.
+    previous = min(
+        readings[:-1],
+        key=lambda r: abs(
+            datetime.fromisoformat(
+                r["timestamp"].replace("Z", "+00:00")
+            ) - target_time
+        ),
+    )
+
+    previous_time = datetime.fromisoformat(
+        previous["timestamp"].replace("Z", "+00:00")
+    )
+
+    # Reject comparisons that are too far from the desired three-hour interval.
+    if abs(previous_time - target_time) > timedelta(minutes=90):
+        return result
+
+    current_hpa = current["pressure_hpa"]
+    previous_hpa = previous["pressure_hpa"]
+
+    result.update({
+        "status": "ok",
+        "pressure_hpa": round(current_hpa, 2),
+        "pressure_3h_ago_hpa": round(previous_hpa, 2),
+        "change_hpa_3h": round(current_hpa - previous_hpa, 2),
+    })
+
+    return result
+
 
 # Function to discover nearby weather stations based on latitude and longitude
 def discover_station_candidates(latitude: float, longitude: float) -> list[dict]:
