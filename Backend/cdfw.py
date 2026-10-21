@@ -1,12 +1,13 @@
 import httpx
-from spots import CSUN_LATITUDE, CSUN_LONGITUDE, MAX_DISTANCE_MILES
 import json
 from pathlib import Path
 from cities import CITY_SEARCH_AREAS
+
 CDFW_PLANTING_URL = (
     "https://services2.arcgis.com/Uq9r85Potqm3MfRV/arcgis/rest/services/"
     "biosds2897_fmu/FeatureServer/0/query"
 )
+
 
 def extract_candidate_waters(features: list[dict]) -> list[dict]:
     unique_waters = {}
@@ -26,9 +27,11 @@ def extract_candidate_waters(features: list[dict]) -> list[dict]:
             "latitude": latitude,
             "longitude": longitude,
             "county": details.get("Counties"),
+            "dfw_water_id": details.get("DfwWaterId"),
         })
 
     return list(unique_waters.values())
+
 
 def get_sample_planting_locations(city: dict) -> list[dict]:
     params = {
@@ -54,6 +57,7 @@ def get_sample_planting_locations(city: dict) -> list[dict]:
         raise RuntimeError("CDFW returned more records than fit in one response")
 
     return data["features"]
+
 
 def get_approved_cdfw_spots(candidates):
     approved_stations = {
@@ -122,6 +126,7 @@ def get_approved_cdfw_spots(candidates):
 
     return approved
 
+
 def get_all_planting_locations() -> list[dict]:
     features = []
     offset = 0
@@ -163,6 +168,7 @@ def get_all_planting_locations() -> list[dict]:
 
     return features
 
+
 if __name__ == "__main__":
     all_features = []
 
@@ -203,8 +209,21 @@ if __name__ == "__main__":
         )
 
     output_path = Path(__file__).with_name("cdfw_approved_spots.json")
-    output_path.write_text(
-        json.dumps(approved_spots, indent=2) + "\n",
-        encoding="utf-8",
+    # Keep spots explicitly reviewed through cdfw_catalog.py when refreshing
+    # this original six-spot list.
+    if output_path.exists():
+        existing = json.loads(output_path.read_text(encoding="utf-8"))
+        if not isinstance(existing, list):
+            raise RuntimeError("Approved spots file must contain a JSON list")
+        known_ids = {spot["id"] for spot in approved_spots}
+        for spot in existing:
+            if spot["id"] not in known_ids:
+                approved_spots.append(spot)
+                known_ids.add(spot["id"])
+
+    temporary_path = output_path.with_suffix(".json.tmp")
+    temporary_path.write_text(
+        json.dumps(approved_spots, indent=2) + "\n", encoding="utf-8"
     )
+    temporary_path.replace(output_path)
     print("Saved approved spots to:", output_path)
