@@ -64,5 +64,29 @@
     "station_latitude": 38.50674,
     "station_longitude": -121.49597,
     "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "elk-grove-park-pond-08f22d69",
+    "name": "Elk Grove Park Pond",
+    "latitude": 38.395032,
+    "longitude": -121.37572,
+    "station_id": "KSAC",
+    "station_name": "Sacramento Executive Airport",
+    "station_latitude": 38.50674,
+    "station_longitude": -121.49597,
+    "source": "CDFW Planting Locations",
+    "access_source": "https://www.cosumnescsd.gov/879/Elk-Grove-Park-Wildlife-Protection"
+  },
+  {
+    "id": "granite-park-pond-ca85eb8e",
+    "name": "Granite Park Pond",
+    "latitude": 38.543737,
+    "longitude": -121.40563,
+    "station_id": "KSAC",
+    "station_name": "Sacramento Executive Airport",
+    "station_latitude": 38.50674,
+    "station_longitude": -121.49597,
+    "source": "CDFW Planting Locations",
+    "access_source": "https://wildlife.ca.gov/Fishing-in-the-city/SAC"
   }
 ]

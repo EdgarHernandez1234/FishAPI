@@ -170,7 +170,16 @@
       }
     ],
     "approved": false,
-    "station_status": "unverified"
+    "station_status": "verified",
+    "station": {
+      "id": "KHHR",
+      "name": "Hawthorne, Hawthorne Municipal Airport",
+      "latitude": 33.92361,
+      "longitude": -118.33194,
+      "distance_miles": 12.3
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:18.189015+00:00"
   },
   {
     "id": "macarthur-park-lake-24ff0919",
@@ -186,7 +195,16 @@
       }
     ],
     "approved": false,
-    "station_status": "unverified"
+    "station_status": "verified",
+    "station": {
+      "id": "KHHR",
+      "name": "Hawthorne, Hawthorne Municipal Airport",
+      "latitude": 33.92361,
+      "longitude": -118.33194,
+      "distance_miles": 9.8
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:19.061644+00:00"
   },
   {
     "id": "rancho-simi-park-lake",
@@ -218,7 +236,16 @@
       }
     ],
     "approved": false,
-    "station_status": "unverified"
+    "station_status": "verified",
+    "station": {
+      "id": "KVNY",
+      "name": "Van Nuys, Van Nuys Airport",
+      "latitude": 34.2125,
+      "longitude": -118.49083,
+      "distance_miles": 3.0
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:20.974124+00:00"
   },
   {
     "id": "elk-grove-park-pond-08f22d69",
@@ -233,8 +260,17 @@
         "distance_miles": 14.4
       }
     ],
-    "approved": false,
-    "station_status": "unverified"
+    "approved": true,
+    "station_status": "verified",
+    "station": {
+      "id": "KSAC",
+      "name": "Sacramento Executive Airport",
+      "latitude": 38.50674,
+      "longitude": -121.49597,
+      "distance_miles": 10.1
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:22.636501+00:00"
   },
   {
     "id": "granite-park-pond-ca85eb8e",
@@ -249,8 +285,17 @@
         "distance_miles": 5.5
       }
     ],
-    "approved": false,
-    "station_status": "unverified"
+    "approved": true,
+    "station_status": "verified",
+    "station": {
+      "id": "KSAC",
+      "name": "Sacramento Executive Airport",
+      "latitude": 38.50674,
+      "longitude": -121.49597,
+      "distance_miles": 5.5
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:23.554487+00:00"
   },
   {
     "id": "hagan-community-park-pond-249cf0df",
@@ -266,7 +311,16 @@
       }
     ],
     "approved": false,
-    "station_status": "unverified"
+    "station_status": "verified",
+    "station": {
+      "id": "KMHR",
+      "name": "Sacramento Mather Airport",
+      "latitude": 38.55996,
+      "longitude": -121.28397,
+      "distance_miles": 3.4
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:57:51.393271+00:00"
   },
   {
     "id": "howe-community-park-lake-4dc4fa9a",
@@ -282,7 +336,16 @@
       }
     ],
     "approved": false,
-    "station_status": "unverified"
+    "station_status": "verified",
+    "station": {
+      "id": "KMHR",
+      "name": "Sacramento Mather Airport",
+      "latitude": 38.55996,
+      "longitude": -121.28397,
+      "distance_miles": 7.6
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:57:52.471008+00:00"
   },
   {
     "id": "mather-lake",
@@ -346,6 +409,15 @@
       }
     ],
     "approved": false,
-    "station_status": "unverified"
+    "station_status": "verified",
+    "station": {
+      "id": "D3169",
+      "name": "DW3169 Oakland",
+      "latitude": 37.83213,
+      "longitude": -122.25003,
+      "distance_miles": 1.5
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:57:54.017427+00:00"
   }
 ]
