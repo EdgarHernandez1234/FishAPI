@@ -20,15 +20,41 @@ def score_time_of_day(local_time: datetime, sunrise: datetime, sunset: datetime)
     return 50 #not a good time
 
 
-def get_sun_times(latitude: float, longitude: float, now: datetime | None = None):
-    """Return (local_time, sunrise, sunset) for a location."""
-    tz_name = _finder.timezone_at(lat=latitude, lng=longitude)
+def get_sun_times(
+    latitude: float,
+    longitude: float,
+    now: datetime | None = None,
+):
+    """Return local time, sunrise, and sunset for a location."""
+
+    tz_name = _finder.timezone_at(
+        lat=latitude,
+        lng=longitude,
+    )
+
     if tz_name is None:
-        raise ValueError("Could not determine timezone for this location")
+        raise ValueError(
+            "Could not determine timezone for this location"
+        )
 
     tz = ZoneInfo(tz_name)
-    local_time = now.astimezone(tz) if now else datetime.now(tz)
 
-    observer = Observer(latitude=latitude, longitude=longitude)
-    times = sun(observer, date=local_time.date(), tzinfo=tz)
+    if now is not None:
+        if now.tzinfo is None or now.utcoffset() is None:
+            raise ValueError("now must be timezone-aware")
+        local_time = now.astimezone(tz)
+    else:
+        local_time = datetime.now(tz)
+
+    observer = Observer(
+        latitude=latitude,
+        longitude=longitude,
+    )
+
+    times = sun(
+        observer,
+        date=local_time.date(),
+        tzinfo=tz,
+    )
+
     return local_time, times["sunrise"], times["sunset"]
