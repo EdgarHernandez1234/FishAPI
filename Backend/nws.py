@@ -23,6 +23,17 @@ def get_recent_observations(station_id: str, hours: int = 3) -> list[dict]:
     response.raise_for_status()
     return response.json()["features"]
 
+def average_pressure_hpa(observations: list[dict]) -> float | None:
+    readings = extract_pressure_readings(observations)
+
+    if not readings:
+        return None
+
+    return round(
+        sum(reading["value"] for reading in readings) / len(readings),
+        2,
+    )
+
 def extract_wind_readings(observations):
     readings = []
 
@@ -114,12 +125,10 @@ def discover_station_candidates(latitude: float, longitude: float) -> list[dict]
 
 # Main execution block to demonstrate the usage of the functions
 if __name__ == "__main__":
-    for spot in SPOTS:
-        result = get_pressure_data_for_spot(spot)
+    station_id = "KSMO"
+    observations = get_recent_observations(station_id)
+    average = average_pressure_hpa(observations)
 
-        print(
-            result["spot"]["name"],
-            "| status:", result["status"],
-            "| station:", result["station"]["id"] if result["station"] else None,
-            "| readings:", len(result["readings"]),
-        )
+    print("Station:", station_id)
+    print("Observations returned:", len(observations))
+    print("3-hour average pressure:", average, "hPa")
