@@ -23,6 +23,26 @@ def get_recent_observations(station_id: str, hours: int = 12) -> list[dict]:
     response.raise_for_status()
     return response.json()["features"]
 
+def extract_wind_readings(observations):
+    readings = []
+
+    for observation in observations:
+        data = observation.get("properties", observation)
+        speed = data.get("windSpeed") or {}
+
+        if speed.get("value") is None:
+            continue
+
+        readings.append({
+            "timestamp": data["timestamp"],
+            "windSpeed": speed,
+            "windDirection": data.get("windDirection"),
+            "windGust": data.get("windGust"),
+        })
+
+    readings.sort(key=lambda reading: reading["timestamp"])
+    return readings
+
 def extract_pressure_readings(observations: list[dict]) -> list[dict]:
     readings = []
 
@@ -52,13 +72,14 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
 
     observations = get_recent_observations(station["id"])
     readings = extract_pressure_readings(observations)
-
+    wind_readings = extract_wind_readings(observations)
     return {
         "status": "ok" if len(readings) >= 3 else "pressure_unavailable",
         "spot": spot,
         "station": station,
         "pressureField": "barometricPressure",
         "readings": readings,
+        "windReadings": wind_readings
     }
 
 # Function to discover nearby weather stations based on latitude and longitude
