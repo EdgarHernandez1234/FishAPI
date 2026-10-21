@@ -20,5 +20,27 @@
     "station_latitude": 34.01583,
     "station_longitude": -118.45139,
     "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "merced-lake-north",
+    "name": "Merced Lake North",
+    "latitude": 37.727309,
+    "longitude": -122.494671,
+    "station_id": "KSFO",
+    "station_name": "San Francisco, San Francisco International Airport",
+    "station_latitude": 37.61961,
+    "station_longitude": -122.36558,
+    "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "southside-park-pond",
+    "name": "Southside Park Pond",
+    "latitude": 38.567586,
+    "longitude": -121.50294,
+    "station_id": "KSAC",
+    "station_name": "Sacramento Executive Airport",
+    "station_latitude": 38.50674,
+    "station_longitude": -121.49597,
+    "source": "CDFW Planting Locations"
   }
 ]

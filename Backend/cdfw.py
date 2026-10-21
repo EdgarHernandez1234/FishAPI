@@ -2,7 +2,7 @@ import httpx
 from spots import CSUN_LATITUDE, CSUN_LONGITUDE, MAX_DISTANCE_MILES
 import json
 from pathlib import Path
-
+from cities import CITY_SEARCH_AREAS
 CDFW_PLANTING_URL = (
     "https://services2.arcgis.com/Uq9r85Potqm3MfRV/arcgis/rest/services/"
     "biosds2897_fmu/FeatureServer/0/query"
@@ -30,18 +30,18 @@ def extract_candidate_waters(features: list[dict]) -> list[dict]:
 
     return list(unique_waters.values())
 
-def get_sample_planting_locations() -> list[dict]:
+def get_sample_planting_locations(city: dict) -> list[dict]:
     params = {
-    "where": "1=1",
-    "geometry": f"{CSUN_LONGITUDE},{CSUN_LATITUDE}",
-    "geometryType": "esriGeometryPoint",
-    "inSR": 4326,
-    "distance": MAX_DISTANCE_MILES,
-    "units": "esriSRUnit_StatuteMile",
-    "outFields": "WaterName,Lat,Lon,FishType,Counties,DfwWaterId",
-    "returnGeometry": "false",
-    "resultRecordCount": 2000,
-    "f": "json",
+        "where": "1=1",
+        "geometry": f"{city['longitude']},{city['latitude']}",
+        "geometryType": "esriGeometryPoint",
+        "inSR": 4326,
+        "distance": city["radius_miles"],
+        "units": "esriSRUnit_StatuteMile",
+        "outFields": "WaterName,Lat,Lon,FishType,Counties,DfwWaterId",
+        "returnGeometry": "false",
+        "resultRecordCount": 2000,
+        "f": "json",
     }
 
     response = httpx.get(CDFW_PLANTING_URL, params=params, timeout=15.0)
@@ -52,6 +52,7 @@ def get_sample_planting_locations() -> list[dict]:
         raise RuntimeError(f"CDFW query failed: {data['error']}")
     if data.get("exceededTransferLimit"):
         raise RuntimeError("CDFW returned more records than fit in one response")
+
     return data["features"]
 
 def get_approved_cdfw_spots(candidates):
@@ -69,6 +70,20 @@ def get_approved_cdfw_spots(candidates):
             "station_name": "Santa Monica, Santa Monica Municipal Airport",
             "station_latitude": 34.01583,
             "station_longitude": -118.45139,
+        },
+        "merced lake north": {
+            "id": "merced-lake-north",
+            "station_id": "KSFO",
+            "station_name": "San Francisco, San Francisco International Airport",
+            "station_latitude": 37.61961,
+            "station_longitude": -122.36558,
+        },
+        "southside park pond": {
+            "id": "southside-park-pond",
+            "station_id": "KSAC",
+            "station_name": "Sacramento Executive Airport",
+            "station_latitude": 38.50674,
+            "station_longitude": -121.49597,
         },
     }
 
@@ -93,10 +108,15 @@ def get_approved_cdfw_spots(candidates):
 
     return approved
 if __name__ == "__main__":
-    features = get_sample_planting_locations()
-    candidates = extract_candidate_waters(features)
+    all_features = []
 
-    print("Planting records:", len(features))
+    for city_id in ("los-angeles", "san-francisco", "sacramento"):
+        city = CITY_SEARCH_AREAS[city_id]
+        features = get_sample_planting_locations(city)
+        all_features.extend(features)
+        print(f"{city['name']}: {len(features)} planting records")
+
+    candidates = extract_candidate_waters(all_features)
     print("Distinct candidate waters:", len(candidates))
 
     for water in candidates:
@@ -105,10 +125,24 @@ if __name__ == "__main__":
             "| county:", water["county"],
             "| coordinates:", water["latitude"], water["longitude"],
         )
+
     approved_spots = get_approved_cdfw_spots(candidates)
     print("Approved CDFW spots:", approved_spots)
-    if not approved_spots:
-        raise RuntimeError("No approved CDFW spots found; saved file was not changed")
+
+    expected_ids = {
+        "rancho-simi-park-lake",
+        "kenneth-hahn-lake",
+        "merced-lake-north",
+        "southside-park-pond",
+    }
+    found_ids = {spot["id"] for spot in approved_spots}
+    missing_ids = expected_ids - found_ids
+
+    if missing_ids:
+        raise RuntimeError(
+            f"Approved spots missing from CDFW results: {sorted(missing_ids)}; "
+            "saved file was not changed"
+        )
 
     output_path = Path(__file__).with_name("cdfw_approved_spots.json")
     output_path.write_text(
