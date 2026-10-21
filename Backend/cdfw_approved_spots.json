@@ -22,6 +22,17 @@
     "source": "CDFW Planting Locations"
   },
   {
+    "id": "alondra-park-lake",
+    "name": "Alondra Park Lake",
+    "latitude": 33.882028,
+    "longitude": -118.334293,
+    "station_id": "KHHR",
+    "station_name": "Hawthorne, Hawthorne Municipal Airport",
+    "station_latitude": 33.92361,
+    "station_longitude": -118.33194,
+    "source": "CDFW Planting Locations"
+  },
+  {
     "id": "merced-lake-north",
     "name": "Merced Lake North",
     "latitude": 37.727309,
@@ -30,6 +41,17 @@
     "station_name": "San Francisco, San Francisco International Airport",
     "station_latitude": 37.61961,
     "station_longitude": -122.36558,
+    "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "mather-lake",
+    "name": "Mather Lake",
+    "latitude": 38.556128,
+    "longitude": -121.253596,
+    "station_id": "KMHR",
+    "station_name": "Sacramento Mather Airport",
+    "station_latitude": 38.55996,
+    "station_longitude": -121.28397,
     "source": "CDFW Planting Locations"
   },
   {

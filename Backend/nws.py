@@ -7,6 +7,9 @@ NWS_HEADERS = {
     "User-Agent": "CSUNFreshwaterFishing/0.1",
     "Accept": "application/geo+json",
 }
+def average_pressure_hpa(readings: list[dict]) -> float | None:
+    values = [reading["value"] for reading in readings]
+    return round(sum(values) / len(values), 2) if values else None
 
 # Function to retrieve recent observations from a specific station
 def get_recent_observations(station_id: str, hours: int = 3) -> list[dict]:

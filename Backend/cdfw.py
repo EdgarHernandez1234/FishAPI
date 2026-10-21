@@ -85,6 +85,20 @@ def get_approved_cdfw_spots(candidates):
             "station_latitude": 38.50674,
             "station_longitude": -121.49597,
         },
+        "alondra park lake": {
+            "id": "alondra-park-lake",
+            "station_id": "KHHR",
+            "station_name": "Hawthorne, Hawthorne Municipal Airport",
+            "station_latitude": 33.92361,
+            "station_longitude": -118.33194,
+        },
+        "mather lake": {
+            "id": "mather-lake",
+            "station_id": "KMHR",
+            "station_name": "Sacramento Mather Airport",
+            "station_latitude": 38.55996,
+            "station_longitude": -121.28397,
+        },
     }
 
     approved = []
@@ -107,6 +121,48 @@ def get_approved_cdfw_spots(candidates):
         })
 
     return approved
+
+def get_all_planting_locations() -> list[dict]:
+    features = []
+    offset = 0
+    page_size = 1000
+
+    while True:
+        params = {
+            "where": "1=1",
+            "outFields": "OBJECTID,WaterName,Lat,Lon,FishType,Counties,DfwWaterId",
+            "returnGeometry": "false",
+            "orderByFields": "OBJECTID ASC",
+            "resultOffset": offset,
+            "resultRecordCount": page_size,
+            "f": "json",
+        }
+
+        response = httpx.get(
+            CDFW_PLANTING_URL,
+            params=params,
+            timeout=30.0,
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        if "error" in data:
+            raise RuntimeError(f"CDFW query failed: {data['error']}")
+
+        page = data.get("features")
+        if not isinstance(page, list):
+            raise RuntimeError("CDFW response is missing its features list")
+
+        features.extend(page)
+        offset += len(page)
+
+        if len(page) < page_size and not data.get("exceededTransferLimit"):
+            break
+        if not page:
+            raise RuntimeError("CDFW reported more results but returned an empty page")
+
+    return features
+
 if __name__ == "__main__":
     all_features = []
 
@@ -134,6 +190,8 @@ if __name__ == "__main__":
         "kenneth-hahn-lake",
         "merced-lake-north",
         "southside-park-pond",
+        "alondra-park-lake",
+        "mather-lake",
     }
     found_ids = {spot["id"] for spot in approved_spots}
     missing_ids = expected_ids - found_ids
