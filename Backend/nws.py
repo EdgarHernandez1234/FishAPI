@@ -1,3 +1,4 @@
+
 import httpx
 
 from spots import SPOTS
@@ -91,14 +92,78 @@ def discover_station_candidates(latitude: float, longitude: float) -> list[dict]
 
     return candidates
 
+CLOUD_PCT = {"CLR": 0, "SKC": 0, "FEW": 18, "SCT": 40, "BKN": 75, "OVC": 100}
+
+
+def _first_value(observations, getter):
+    """Return the first non-None value from newest to oldest."""
+    for obs in observations:
+        value = getter(obs["properties"])
+        if value is not None:
+            return value
+    return None
+
+
+def _sky_pct(props):
+    layers = props.get("cloudLayers") or []
+    if not layers:
+        return None
+    return max(CLOUD_PCT.get(layer["amount"], 0) for layer in layers)
+
+def get_hourly_forecast(spot: dict) -> list[dict]:
+    lat = round(spot["latitude"], 4)
+    lon = round(spot["longitude"], 4)
+
+    point = httpx.get(
+        f"https://api.weather.gov/points/{lat},{lon}",
+        headers=NWS_HEADERS,
+        timeout=15.0,
+        follow_redirects=True,
+    )
+    point.raise_for_status()
+    hourly_url = point.json()["properties"]["forecastHourly"]
+
+    forecast = httpx.get(
+        hourly_url,
+        headers=NWS_HEADERS,
+        timeout=15.0,
+        follow_redirects=True,
+    )
+    forecast.raise_for_status()
+    return forecast.json()["properties"]["periods"]
+
+def precip_chance_now(periods: list[dict], now: datetime | None = None) -> int | None:
+    """Return the chance of precipitation (0-100) for the hour containing `now`.
+
+    periods: the list returned by get_hourly_forecast(spot).
+    now: a timezone-aware datetime. Defaults to the current time.
+    Returns None if no period matches or the forecast has no value.
+    """
+    now = now or datetime.now(timezone.utc)
+
+    for period in periods:
+        start = datetime.fromisoformat(period["startTime"])
+        end = datetime.fromisoformat(period["endTime"])
+        if start <= now < end:
+            return period["probabilityOfPrecipitation"]["value"]
+
+    return None
+
+
+
+def extract_wind(observations: list[dict]) -> dict:
+    wind_kmh = _first_value(observations, lambda p: p["windSpeed"]["value"])
+
+    return {
+        "wind_mph": None if wind_kmh is None else wind_kmh * 0.621371,
+    }
+
+def get_wind_for_spot(spot: dict) -> dict:
+    observations = get_recent_observations(spot["station_id"])
+    return extract_wind(observations)
+
+
 # Main execution block to demonstrate the usage of the functions
 if __name__ == "__main__":
     for spot in SPOTS:
-        result = get_pressure_data_for_spot(spot)
-
-        print(
-            result["spot"]["name"],
-            "| status:", result["status"],
-            "| station:", result["station"]["id"] if result["station"] else None,
-            "| readings:", len(result["readings"]),
-        )
+        print(get_hourly_forecast(spot))

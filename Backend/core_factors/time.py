@@ -1,26 +1,34 @@
-def score_time(hour: int) -> int:
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+from astral import Observer
+from astral.sun import sun
+from timezonefinder import TimezoneFinder
+
+_finder = TimezoneFinder()   # create once, it's slow to build
+
+
+def score_time_of_day(local_time: datetime, sunrise: datetime, sunset: datetime) -> int:
+    """Return a 0-100 fishing score based on time of day.
+
+    All three datetimes must be timezone-aware and in the same timezone.
     """
-    Score time of day for freshwater fishing.
-    Hour must be 0-23, using local time.
-    """
-    if not 0 <= hour <= 23:
-        raise ValueError("Hour must be between 0 and 23")
+    if sunrise <= local_time <= sunrise + timedelta(hours=2):
+        return 100          # morning 
+    if sunset - timedelta(hours=3) <= local_time <= sunset:
+        return 95           # evening
+    return 50 #not a good time
 
-    # Best: early morning (5 AM - 8 AM)
-    if 5 <= hour <= 8:
-        return 100
 
-    # Good: evening (5 PM - 8 PM)
-    if 17 <= hour <= 20:
-        return 90
+def get_sun_times(latitude: float, longitude: float, now: datetime | None = None):
+    """Return (local_time, sunrise, sunset) for a location."""
+    tz_name = _finder.timezone_at(lat=latitude, lng=longitude)
+    if tz_name is None:
+        raise ValueError("Could not determine timezone for this location")
 
-    # Fair: morning and late afternoon
-    if 9 <= hour <= 11 or 14 <= hour <= 16:
-        return 70
+    tz = ZoneInfo(tz_name)
+    local_time = now.astimezone(tz) if now else datetime.now(tz)
 
-    # Lower: midday
-    if 12 <= hour <= 13:
-        return 50
-
-    # Lower: nighttime and very early morning
-    return 40
+    observer = Observer(latitude=latitude, longitude=longitude)
+    times = sun(observer, date=local_time.date(), tzinfo=tz)
+    return local_time, times["sunrise"], times["sunset"]
