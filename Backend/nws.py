@@ -55,8 +55,8 @@ def extract_pressure_readings(observations: list[dict]) -> list[dict]:
 
         readings.append({
             "timestamp": details["timestamp"],
-            "value": pressure["value"],
-            "unitCode": pressure.get("unitCode"),
+            "value": pressure["value"] / 100,  # Convert from Pa to hPa
+            "unitCode": "wmoUnit:hPa",
         })
 
     return sorted(readings, key=lambda reading: reading["timestamp"])
