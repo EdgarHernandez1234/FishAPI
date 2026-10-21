@@ -88,7 +88,8 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
         "station": station,
         "pressureField": "barometricPressure",
         "readings": readings,
-        "windReadings": wind_readings
+        "windReadings": wind_readings,
+        "averagePressureHpa": average_pressure_hpa(readings),
     }
 
 # Function to discover nearby weather stations based on latitude and longitude
