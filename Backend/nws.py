@@ -9,7 +9,7 @@ NWS_HEADERS = {
 }
 
 # Function to retrieve recent observations from a specific station
-def get_recent_observations(station_id: str, hours: int = 12) -> list[dict]:
+def get_recent_observations(station_id: str, hours: int = 3) -> list[dict]:
     end = datetime.now(timezone.utc)
     start = end - timedelta(hours=hours)
     url = f"https://api.weather.gov/stations/{station_id}/observations"
