@@ -3,83 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fisch</title>
+    <meta name="description" content="Fisch Halloween Edition fishing forecasts and community">
+    <title>Fish | Halloween Edition</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <form class="search-box" action="/search" method="GET">
-        <div class="search-wrapper">    
-            <input type="text" name="q" placeholder="Input a city in California here" aria-label="Search">
-            
-            <button type="submit">Search</button>
-        </div>
-    </form>
-
-    <header>
-        <h1>Bite Score</h1>
-    </header>
-
-    <div id="Date-Blocks">
-        <div class="day" id="today">
-            <h1 class="date">Oct 16th</h1>
-            <span class="score" id="ten">10</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 17th</h1>
-            <span class="score" id="eight">8</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 18th</h1>
-            <span class="score" id="six">6</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 19th</h1>
-            <span class="score" id="five">5</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 20th</h1>
-            <span class="score" id="three">3</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 21st</h1>
-            <span class="score" id="one">1</span>
-        </div>
-        <div class="day">
-            <h1 class="date">Oct 22nd</h1>
-            <span class="score" id="seven">7</span>
-        </div>
+    <div class="halloween-background" aria-hidden="true">
+        <span class="bat bat-one">🦇</span>
+        <span class="bat bat-two">🦇</span>
+        <span class="ghost ghost-one">👻</span>
+        <span class="ghost ghost-two">👻</span>
     </div>
-
-    <div id="Main-Blocks">
-        <div id="Overall-Rating">
-            <div id="line">
-                <h1>8/10</h1>
-                <h1>Great day to fish</h1>
+ 
+    <div class="page-container">
+        <nav class="navbar">
+            <div class="brand">
+                <span class="brand-icon">🎃</span>
+                <span>FISH or Treat</span>
+                <span class="brand-edition">FISHOWEEN</span>
             </div>
+            <button id="theme-toggle" type="button">
+                <span id="theme-icon">☀️</span>
+                <span id="theme-label">Light Mode</span>
+            </button>
+        </nav>
+ 
+        <header class="hero">
+            <div class="hero-decoration">🌕 🦇 🎃</div>
+            <div class="hero-badge">👻 HALLOWEEN EDITION</div>
+            <h1>Something's <span>Biting Tonight...</span></h1>
+            <p>Discover fishing forecasts, find the best times to cast your line, and connect with fellow anglers.</p>
+        </header>
+ 
+        <form class="search-box" id="search-form">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="city-search" placeholder="Search for a fishing spot..." aria-label="Search fishing spots" autocomplete="off" required>
+                <button type="submit">Search 🎃</button>
+            </div>
+        </form>
+ 
+        <nav class="tab-navigation" aria-label="Website sections">
+            <button class="tab-button active" data-tab="forecast" type="button">🎣 Forecast</button>
+            <button class="tab-button" data-tab="weather" type="button">🌧️ Weather</button>
+            <button class="tab-button" data-tab="best-day" type="button">🏆 Best Day</button>
+            <button class="tab-button" data-tab="fishing-times" type="button">🌙 Fishing Times</button>
+            <button class="tab-button" data-tab="community" type="button">💬 Community</button>
+        </nav>
+ 
+        <div id="forecast" class="tab-content active">
+            <section class="forecast-section">
+                <div class="section-heading">
+                    <div>
+                        <h2>🎣 The Bite Forecast</h2>
+                        <p>Seven days of spooky fishing predictions</p>
+                    </div>
+                </div>
+                <div id="Date-Blocks"></div>
+            </section>
+ 
+            <main id="Main-Blocks">
+                <div class="section-heading">
+                    <div>
+                        <h2>🔮 Fishing Fortune</h2>
+                        <p>See what the weather spirits predict</p>
+                    </div>
+                </div>
+ 
+                <section id="Overall-Rating">
+                    <div id="line">
+                        <h1 id="overall-score">--/10</h1>
+                        <h1 id="rating-message">Summoning the forecast...</h1>
+                    </div>
+                </section>
+ 
+                <section id="Sub-Rating-Blocks">
+                    <div class="rating">
+                        <h3>🧭 Pressure</h3>
+                        <div class="bar"><div class="fill" id="pressure"></div></div>
+                    </div>
+                    <div class="rating">
+                        <h3>🌡️ Water Temperature</h3>
+                        <div class="bar"><div class="fill" id="temperature"></div></div>
+                    </div>
+                    <div class="rating">
+                        <h3>☁️ Clouds</h3>
+                        <div class="bar"><div class="fill" id="clouds"></div></div>
+                    </div>
+                    <div class="rating">
+                        <h3>🌧️ Rain</h3>
+                        <div class="bar"><div class="fill" id="rain"></div></div>
+                    </div>
+                    <div class="rating">
+                        <h3>💨 Wind</h3>
+                        <div class="bar"><div class="fill" id="surf"></div></div>
+                    </div>
+                    <div class="rating">
+                    <h3>🌕 Moon</h3>
+                    <div class="bar"><div class="fill" id="moon"></div></div>
+                    </div>
+                </section>
+            </main>
         </div>
-        <div id="Sub-Rating-Blocks">
-            <div class="rating">
-                <h1>Pressure</h1>
-                <div class="bar"><div class="fill" id="pressure"></div></div>
-            </div>
-            <div class="rating">
-                <h1>Temperature</h1>
-                <div class="bar"><div class="fill" id="temperature"></div></div>
-            </div>
-            <div class="rating">
-                <h1>Clouds</h1>
-                <div class="bar"><div class="fill" id="clouds"></div></div>
-            </div>
-            <div class="rating">
-                <h1>Rain</h1>
-                <div class="bar"><div class="fill" id="rain"></div></div>
-            </div>
-            <div class="rating">
-                <h1>Surf</h1>
-                <div class="bar"><div class="fill" id="surf"></div></div>
-            </div>
+ 
+        <div id="weather" class="tab-content" hidden>
+            <section id="Weather-Conditions">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="weather-title">🌙 Current Weather</h2>
+                        <p>Conditions around your fishing spot</p>
+                    </div>
+                    <span class="weather-badge" id="weather-badge">Current</span>
+                </div>
+ 
+                <div class="weather-grid">
+                    <div class="weather-card temperature-card">
+                        <div class="weather-icon">🌡️</div>
+                        <h3 id="weather-temperature">--°F</h3>
+                        <p>Temperature</p>
+                    </div>
+                    <div class="weather-card rain-card">
+                        <div class="weather-icon">🌧️</div>
+                        <h3 id="weather-rain">--%</h3>
+                        <p>Rain Chance</p>
+                    </div>
+                    <div class="weather-card wind-card">
+                        <div class="weather-icon">💨</div>
+                        <h3 id="weather-wind">-- mph</h3>
+                        <p>Wind Speed</p>
+                        <span id="wind-direction"></span>
+                    </div>
+                    <div class="weather-card pressure-card">
+                        <div class="weather-icon">🧭</div>
+                        <h3 id="weather-pressure">-- hPa</h3>
+                        <p>Air Pressure</p>
+                    </div>
+                </div>
+                <p id="weather-updated"></p>
+            </section>
         </div>
+ 
+        <div id="best-day" class="tab-content" hidden>
+            <section id="Best-Day-Section">
+                <div class="section-heading">
+                    <div>
+                        <h2>🏆 The Golden Pumpkin</h2>
+                        <p>Best fishing day of the week</p>
+                    </div>
+                </div>
+ 
+                <div class="recommendation-card">
+                    <div class="recommendation-top">
+                        <div>
+                            <span class="top-pick-label">🎃 TOP PICK</span>
+                            <h3 id="best-day-name">Calculating...</h3>
+                        </div>
+                        <span id="best-day-score">--/10</span>
+                    </div>
+                    <p id="best-day-reason">Analyzing fishing conditions...</p>
+                    <div class="best-time">
+                        <div>
+                            <span>🌅 Best Time to Fish</span>
+                            <strong id="best-day-time">--</strong>
+                        </div>
+                        <span class="time-icon">🎣</span>
+                    </div>
+                </div>
+            </section>
+ 
+            <section id="Fishing-Times-Section">
+                <div class="section-heading">
+                    <div>
+                        <h2>📜 The Fishing Leaderboard</h2>
+                        <p>Every day ranked from best to worst</p>
+                    </div>
+                </div>
+                <div id="fishing-times-list"></div>
+            </section>
+        </div>
+ 
+        <div id="fishing-times" class="tab-content" hidden>
+            <section id="Hourly-Section">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="hourly-title">🌙 Top Fishing Times</h2>
+                        <p>Three recommended fishing windows for your selected day</p>
+                    </div>
+                </div>
+ 
+                <div class="hourly-day-selector">
+                    <label for="hourly-day-select">Select a day:</label>
+                    <select id="hourly-day-select">
+                        <option value="">Loading days...</option>
+                    </select>
+                </div>
+ 
+                <div id="hourly-times-list"></div>
+            </section>
+        </div>
+ 
+        <div id="community" class="tab-content" hidden>
+            <section class="community-section">
+                <div class="section-heading">
+                    <div>
+                        <h2>💬 The Fishing Community</h2>
+                        <p>Ask questions, share tips, and discuss your latest fishing adventures</p>
+                    </div>
+                </div>
+ 
+                <div class="community-layout">
+                    <div class="community-main">
+                        <div class="community-toolbar">
+                            <input id="community-search" type="search" placeholder="🔍 Search discussions...">
+                            <select id="community-category">
+                                <option value="all">All Categories</option>
+                                <option value="Questions">Questions</option>
+                                <option value="Fishing Tips">Fishing Tips</option>
+                                <option value="Locations">Locations</option>
+                                <option value="Gear">Gear</option>
+                                <option value="Catch Reports">Catch Reports</option>
+                            </select>
+                            <select id="community-sort">
+                                <option value="newest">Newest</option>
+                                <option value="top">Top Voted</option>
+                                <option value="discussed">Most Discussed</option>
+                            </select>
+                        </div>
+ 
+                        <div class="community-create">
+                            <div class="create-heading">
+                                <span class="community-avatar">🎣</span>
+                                <div>
+                                    <h3>Start a Discussion</h3>
+                                    <p>Have a fishing question? Ask the community!</p>
+                                </div>
+                            </div>
+ 
+                            <form id="post-form">
+                                <input id="post-author" type="text" maxlength="40" placeholder="Your username" required>
+                                <input id="post-title" type="text" maxlength="150" placeholder="What would you like to ask?" required>
+                                <select id="post-category" required>
+                                    <option value="Questions">Questions</option>
+                                    <option value="Fishing Tips">Fishing Tips</option>
+                                    <option value="Locations">Locations</option>
+                                    <option value="Gear">Gear</option>
+                                    <option value="Catch Reports">Catch Reports</option>
+                                </select>
+                                <textarea id="post-content" rows="5" maxlength="3000" placeholder="Share the details of your question or discussion..." required></textarea>
+                                <div class="post-form-footer">
+                                    <span>🎃 Keep discussions friendly and fishing-related</span>
+                                    <button type="submit">Create Post 🎣</button>
+                                </div>
+                            </form>
+                        </div>
+ 
+                        <div class="feed-heading">
+                            <h3>🔥 Community Discussions</h3>
+                            <span id="post-count">0 posts</span>
+                        </div>
+ 
+                        <div id="community-posts"></div>
+                    </div>
+ 
+                    <aside class="community-sidebar">
+                        <div class="sidebar-card">
+                            <div class="sidebar-icon">🎃</div>
+                            <h3>Welcome to Fisch!</h3>
+                            <p>A place for anglers to share knowledge, discover fishing spots, and help each other catch more fish.</p>
+                            <div class="community-stats">
+                                <div><strong id="total-posts">0</strong><span>Posts</span></div>
+                                <div><strong id="total-comments">0</strong><span>Replies</span></div>
+                            </div>
+                        </div>
+ 
+                        <div class="sidebar-card">
+                            <h3>📜 Community Guidelines</h3>
+                            <p>Be respectful to other anglers.</p>
+                            <p>Share helpful fishing advice.</p>
+                            <p>Respect local fishing regulations.</p>
+                            <p>Keep posts relevant to fishing.</p>
+                        </div>
+ 
+                        <div class="sidebar-card">
+                            <h3>🏷️ Popular Topics</h3>
+                            <div class="topic-tags">
+                                <span>🎣 Fishing Tips</span>
+                                <span>📍 Locations</span>
+                                <span>🐟 Catch Reports</span>
+                                <span>🧰 Gear</span>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+        </div>
+ 
+        <footer>
+            <div class="footer-pumpkins">🎃 🦇 👻 🦇 🎃</div>
+            <p>Made for anglers brave enough to fish after dark.</p>
+            <p>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> and the <a href="https://www.weather.gov/" target="_blank" rel="noopener noreferrer">National Weather Service</a>. Fishing scores are weather-based estimates.</p>
+            <p class="footer-brand">FISCH — HALLOWEEN EDITION</p>
+        </footer>
     </div>
-
 </body>
 </html>
+ 

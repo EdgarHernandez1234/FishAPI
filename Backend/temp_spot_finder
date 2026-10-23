@@ -1,0 +1,25 @@
+import httpx
+from main import ALL_SPOTS      # or build the same list from spots.py and the CDFW JSON
+
+def nearby_temp_sites(lat, lon, radius_deg=0.1):
+    bbox = f"{lon - radius_deg:.4f},{lat - radius_deg:.4f},{lon + radius_deg:.4f},{lat + radius_deg:.4f}"
+    response = httpx.get(
+        "https://waterservices.usgs.gov/nwis/site/",
+        params={"format": "rdb", "bBox": bbox, "parameterCd": "00010",
+                "hasDataTypeCd": "iv", "siteStatus": "active"},
+        timeout=20.0,
+    )
+    if response.status_code == 404:          # no matching sites
+        return []
+    response.raise_for_status()
+
+    rows = [line for line in response.text.splitlines() if line and not line.startswith("#")]
+    if len(rows) < 3:
+        return []
+    header = rows[0].split("\t")
+    return [dict(zip(header, line.split("\t"))) for line in rows[2:]]   # rows[1] is a format row
+
+for spot in ALL_SPOTS:
+    sites = nearby_temp_sites(spot["latitude"], spot["longitude"])
+    print(spot.get("name", spot["id"]), "->", len(sites), "sites",
+          [(s["site_no"], s["station_nm"], s["site_tp_cd"]) for s in sites[:3]])

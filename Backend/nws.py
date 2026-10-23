@@ -1,3 +1,4 @@
+
 import httpx
 
 from spots import SPOTS
@@ -35,7 +36,7 @@ def average_pressure_hpa(readings: list[dict]) -> float | None:
         2,
     )
 
-def extract_wind_readings(observations):
+def extract_wind_readingst(observations):
     readings = []
 
     for observation in observations:
@@ -59,21 +60,36 @@ def extract_pressure_readings(observations: list[dict]) -> list[dict]:
     readings = []
 
     for observation in observations:
-        details = observation["properties"]
-        pressure = details.get("barometricPressure") or {}
+        props = observation.get("properties", {})
+        pressure = props.get("barometricPressure") or {}
+        value = pressure.get("value")
 
-        if pressure.get("value") is None:
+        if value is None:
+            continue
+
+        unit_code = pressure.get("unitCode", "")
+
+        # NWS commonly reports barometric pressure in pascals.
+        if unit_code.endswith(":Pa") or unit_code == "Pa":
+            value_hpa = float(value) / 100
+        elif unit_code.endswith(":hPa") or unit_code == "hPa":
+            value_hpa = float(value)
+        else:
+            # Do not guess if the API reports an unexpected unit.
+            continue
+
+        timestamp = props.get("timestamp")
+        if not timestamp:
             continue
 
         readings.append({
-            "timestamp": details["timestamp"],
-            "value": pressure["value"] / 100,  # Convert from Pa to hPa
-            "unitCode": "wmoUnit:hPa",
+            "timestamp": timestamp,
+            "pressure_hpa": value_hpa,
         })
 
-    return sorted(readings, key=lambda reading: reading["timestamp"])
+    return sorted(readings, key=lambda r: r["timestamp"])
 
-# Function to get pressure data for a specific spot
+
 def get_pressure_data_for_spot(spot: dict) -> dict:
     station = {
         "id": spot["station_id"],
@@ -82,18 +98,65 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
         "longitude": spot["station_longitude"],
     }
 
-    observations = get_recent_observations(station["id"])
+    observations = get_recent_observations(station["id"], hours=12)
     readings = extract_pressure_readings(observations)
     wind_readings = extract_wind_readings(observations)
     return {
         "status": "ok" if len(readings) >= 3 else "pressure_unavailable",
+
+    result = {
         "spot": spot,
         "station": station,
         "pressureField": "barometricPressure",
+        "pressure_hpa": None,
+        "pressure_3h_ago_hpa": None,
+        "change_hpa_3h": None,
         "readings": readings,
         "windReadings": wind_readings,
         "averagePressureHpa": average_pressure_hpa(readings),
     }
+
+    if len(readings) < 2:
+        return result
+
+    # Use the latest available observation as the current reference.
+    current = readings[-1]
+    current_time = datetime.fromisoformat(
+        current["timestamp"].replace("Z", "+00:00")
+    )
+
+    target_time = current_time - timedelta(hours=3)
+
+    # Find the reading closest to three hours before the latest reading.
+    previous = min(
+        readings[:-1],
+        key=lambda r: abs(
+            datetime.fromisoformat(
+                r["timestamp"].replace("Z", "+00:00")
+            ) - target_time
+        ),
+    )
+
+    previous_time = datetime.fromisoformat(
+        previous["timestamp"].replace("Z", "+00:00")
+    )
+
+    # Reject comparisons that are too far from the desired three-hour interval.
+    if abs(previous_time - target_time) > timedelta(minutes=90):
+        return result
+
+    current_hpa = current["pressure_hpa"]
+    previous_hpa = previous["pressure_hpa"]
+
+    result.update({
+        "status": "ok",
+        "pressure_hpa": round(current_hpa, 2),
+        "pressure_3h_ago_hpa": round(previous_hpa, 2),
+        "change_hpa_3h": round(current_hpa - previous_hpa, 2),
+    })
+
+    return result
+
 
 # Function to discover nearby weather stations based on latitude and longitude
 def discover_station_candidates(latitude: float, longitude: float) -> list[dict]:
@@ -125,6 +188,77 @@ def discover_station_candidates(latitude: float, longitude: float) -> list[dict]
 
     return candidates
 
+CLOUD_PCT = {"CLR": 0, "SKC": 0, "FEW": 18, "SCT": 40, "BKN": 75, "OVC": 100}
+
+
+def _first_value(observations, getter):
+    """Return the first non-None value from newest to oldest."""
+    for obs in observations:
+        value = getter(obs["properties"])
+        if value is not None:
+            return value
+    return None
+
+
+def _sky_pct(props):
+    layers = props.get("cloudLayers") or []
+    if not layers:
+        return None
+    return max(CLOUD_PCT.get(layer["amount"], 0) for layer in layers)
+
+def get_hourly_forecast(spot: dict) -> list[dict]:
+    lat = round(spot["latitude"], 4)
+    lon = round(spot["longitude"], 4)
+
+    point = httpx.get(
+        f"https://api.weather.gov/points/{lat},{lon}",
+        headers=NWS_HEADERS,
+        timeout=15.0,
+        follow_redirects=True,
+    )
+    point.raise_for_status()
+    hourly_url = point.json()["properties"]["forecastHourly"]
+
+    forecast = httpx.get(
+        hourly_url,
+        headers=NWS_HEADERS,
+        timeout=15.0,
+        follow_redirects=True,
+    )
+    forecast.raise_for_status()
+    return forecast.json()["properties"]["periods"]
+
+def precip_chance_now(periods: list[dict], now: datetime | None = None) -> int | None:
+    """Return the chance of precipitation (0-100) for the hour containing `now`.
+
+    periods: the list returned by get_hourly_forecast(spot).
+    now: a timezone-aware datetime. Defaults to the current time.
+    Returns None if no period matches or the forecast has no value.
+    """
+    now = now or datetime.now(timezone.utc)
+
+    for period in periods:
+        start = datetime.fromisoformat(period["startTime"])
+        end = datetime.fromisoformat(period["endTime"])
+        if start <= now < end:
+            return period["probabilityOfPrecipitation"]["value"]
+
+    return None
+
+
+
+def extract_wind(observations: list[dict]) -> dict:
+    wind_kmh = _first_value(observations, lambda p: p["windSpeed"]["value"])
+
+    return {
+        "wind_mph": None if wind_kmh is None else wind_kmh * 0.621371,
+    }
+
+def get_wind_for_spot(spot: dict) -> dict:
+    observations = get_recent_observations(spot["station_id"])
+    return extract_wind(observations)
+
+
 # Main execution block to demonstrate the usage of the functions
 if __name__ == "__main__":
     for spot in SPOTS:
@@ -138,3 +272,4 @@ if __name__ == "__main__":
             "| readings:", len(result["readings"]),
             "| 3-hour average:", average, "hPa",
         )
+        print(get_hourly_forecast(spot))
