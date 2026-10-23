@@ -15,7 +15,7 @@ from core_factors.sky_scorer import score_sky
 from core_factors.wind_scorer import score_wind
 from core_factors.time_of_day import score_time_of_day, get_sun_times
 from location_dependent_factors.barometric_pressure_scorer import pressure_scorer
-from fishing_score import build_days, combine_scores
+from fishing_score import build_days, combine_scores, explain_day
 from core_factors.water_temp_scorer import score_water_temp
 
 def distance_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -341,15 +341,21 @@ def get_spot_score(spot_id: str) -> dict:
     water_scores = {d: score_water_temp(t) for d, t in water_by_date.items()}
 
     days = build_days(periods, water_temp_scores=water_scores)
+    for day in days:
+        day["inputs"]["water_temp"] = water_by_date.get(day["date"])
   
     # pressure only exists for right now, so it only goes on the first day
     try:
         change = get_pressure_data_for_spot(spot)["change_hpa_3h"]
         if days and change is not None:
             days[0]["factors"]["pressure"] = pressure_scorer(change)
+            days[0]["inputs"]["pressure"] = change
             days[0]["score"] = combine_scores(days[0]["factors"])
     except (httpx.HTTPError, KeyError):
         pass   # pressure is optional
+
+    for day in days:
+        day["explanation"] = explain_day(day)
 
     return {"spot": spot,
             "water_temps_c": {d["date"]: round(water_by_date[d["date"]], 1)

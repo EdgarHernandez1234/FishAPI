@@ -20,6 +20,12 @@ WEIGHTS = {
 }
 TARGET_HOUR = 8   # each day is scored at the forecast hour closest to 8 AM local
 
+FACTOR_LABELS = {
+    "precipitation": "Rain chance", "water_temp": "Water temperature",
+    "wind": "Wind", "pressure": "Pressure trend", "season": "Season",
+    "sky": "Cloud cover", "moon": "Moon phase",
+}
+
 
 def sky_pct_from_text(description: str | None) -> float | None:
     d = (description or "").lower()
@@ -61,7 +67,7 @@ def score_period(start: datetime, period: dict) -> dict:
     }
 
 
-def build_days(periods: list[dict], max_days: int = 7, water_temp_scores: int | None = None) -> list[dict]:
+def build_days(periods: list[dict], max_days: int = 7, water_temp_scores: dict[str, int] | None = None) -> list[dict]:
     by_date = {}
     for period in periods:
         start = datetime.fromisoformat(period["startTime"])
@@ -74,5 +80,63 @@ def build_days(periods: list[dict], max_days: int = 7, water_temp_scores: int | 
         factors["water_temp"] = (water_temp_scores or {}).get(day.isoformat())
         score = combine_scores(factors)
         if score is not None:
-            days.append({"date": day.isoformat(), "score": score, "factors": factors})
+            days.append({
+                "date": day.isoformat(), "score": score, "factors": factors,
+                "inputs": {
+                    "wind": wind_mph_from_period(period),
+                    "sky": sky_pct_from_text(period.get("shortForecast")),
+                    "precipitation": (period.get("probabilityOfPrecipitation") or {}).get("value"),
+                    "season": start.month,
+                    "moon": moon.phase(start.date()),
+                    "pressure": None,
+                    "water_temp": None,
+                },
+                "forecast_time": start.isoformat(),
+            })
     return days
+
+
+def explain_day(day: dict) -> dict:
+    """Describe the exact inputs and available weights used for this daily score."""
+    factors = day["factors"]
+    inputs = day["inputs"]
+    total_weight = sum(WEIGHTS[key] for key, value in factors.items() if value is not None)
+    explanations = {}
+
+    for key, score in factors.items():
+        if score is None:
+            explanations[key] = "Data unavailable; excluded from the overall score."
+            continue
+
+        value = inputs.get(key)
+        weight = round(100 * WEIGHTS[key] / total_weight)
+        if key == "wind":
+            detail = f"Forecast wind: {value:g} mph" if value is not None else "Wind forecast"
+        elif key == "sky":
+            detail = f"About {value:g}% cloud cover, inferred from the forecast description" if value is not None else "Sky forecast"
+        elif key == "precipitation":
+            detail = f"Forecast chance of rain: {value:g}%" if value is not None else "Precipitation forecast"
+        elif key == "pressure":
+            detail = f"Pressure changed {value:+.2f} hPa over approximately 3 hours at the nearby station" if value is not None else "Pressure trend"
+        elif key == "water_temp":
+            detail = f"Estimated water temperature: {value:.1f}°C" if value is not None else "Estimated water temperature"
+        elif key == "season":
+            detail = f"Month: {datetime(2000, value, 1):%B}" if value is not None else "Seasonal estimate"
+        else:
+            detail = "Lunar phase estimate"
+
+        explanations[key] = f"{detail}. Factor score: {score}/100; share of available weighting: {weight}%."
+
+    ranked = sorted(
+        (key for key, value in factors.items() if value is not None),
+        key=lambda key: factors[key] * WEIGHTS[key], reverse=True,
+    )
+    leaders = " and ".join(FACTOR_LABELS[key].lower() for key in ranked[:2])
+    time = datetime.fromisoformat(day["forecast_time"])
+    forecast_hour = time.strftime("%I:%M %p").lstrip("0")
+    summary = f"{leaders.capitalize()} contributed most to this {day['score']/10:.1f}/10 estimate, based on a forecast near {forecast_hour}."
+    if factors["pressure"] is None:
+        summary += " Pressure trend was unavailable and excluded."
+    if inputs.get("water_temp") is not None:
+        summary += " Water temperature is estimated from air temperatures."
+    return {"summary": summary, "factors": explanations}
