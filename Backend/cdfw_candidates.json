@@ -1,0 +1,423 @@
+[
+  {
+    "id": "alondra-park-lake",
+    "name": "Alondra Park Lake",
+    "latitude": 33.882028,
+    "longitude": -118.334293,
+    "county": "Los Angeles",
+    "dfw_water_id": 7422,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 27.1
+      }
+    ],
+    "approved": true,
+    "station_status": "unverified"
+  },
+  {
+    "id": "belvedere-lake-471b27c2",
+    "name": "Belvedere Lake",
+    "latitude": 34.034691,
+    "longitude": -118.158507,
+    "county": "Los Angeles",
+    "dfw_water_id": 27430,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 25.5
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KHHR",
+      "name": "Hawthorne, Hawthorne Municipal Airport",
+      "latitude": 33.92361,
+      "longitude": -118.33194,
+      "distance_miles": 12.6
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:47:57.833054+00:00"
+  },
+  {
+    "id": "echo-park-lake-d0cdd5e7",
+    "name": "Echo Park Lake",
+    "latitude": 34.073182,
+    "longitude": -118.260457,
+    "county": "Los Angeles",
+    "dfw_water_id": 7342,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 19.2
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KBUR",
+      "name": "Burbank - Bob Hope Airport",
+      "latitude": 34.19967,
+      "longitude": -118.36538,
+      "distance_miles": 10.6
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:47:59.834347+00:00"
+  },
+  {
+    "id": "hansen-dam-lake-a578e840",
+    "name": "Hansen Dam Lake",
+    "latitude": 34.2661,
+    "longitude": -118.392908,
+    "county": "Los Angeles",
+    "dfw_water_id": 7115,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 8.0
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KBUR",
+      "name": "Burbank - Bob Hope Airport",
+      "latitude": 34.19967,
+      "longitude": -118.36538,
+      "distance_miles": 4.9
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:48:01.203235+00:00"
+  },
+  {
+    "id": "hollenbeck-park-lake-7fa8896f",
+    "name": "Hollenbeck Park Lake",
+    "latitude": 34.039924,
+    "longitude": -118.218236,
+    "county": "Los Angeles",
+    "dfw_water_id": 27435,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 22.5
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KHHR",
+      "name": "Hawthorne, Hawthorne Municipal Airport",
+      "latitude": 33.92361,
+      "longitude": -118.33194,
+      "distance_miles": 10.3
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:48:02.790724+00:00"
+  },
+  {
+    "id": "john-anson-ford-park-lake-268d9fec",
+    "name": "John Anson Ford Park Lake",
+    "latitude": 33.957791,
+    "longitude": -118.15126,
+    "county": "Los Angeles",
+    "dfw_water_id": 28305,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 29.1
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KLGB",
+      "name": "Long Beach, Long Beach Airport",
+      "latitude": 33.81167,
+      "longitude": -118.14639,
+      "distance_miles": 10.1
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:48:04.242412+00:00"
+  },
+  {
+    "id": "kenneth-hahn-lake",
+    "name": "Kenneth Hahn Lake",
+    "latitude": 34.009354,
+    "longitude": -118.370514,
+    "county": "Los Angeles",
+    "dfw_water_id": 27436,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 18.3
+      }
+    ],
+    "approved": true,
+    "station_status": "unverified"
+  },
+  {
+    "id": "lincoln-park-lake-a90bb4f0",
+    "name": "Lincoln Park Lake",
+    "latitude": 34.06624,
+    "longitude": -118.202518,
+    "county": "Los Angeles",
+    "dfw_water_id": 27437,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 22.2
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KHHR",
+      "name": "Hawthorne, Hawthorne Municipal Airport",
+      "latitude": 33.92361,
+      "longitude": -118.33194,
+      "distance_miles": 12.3
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:18.189015+00:00"
+  },
+  {
+    "id": "macarthur-park-lake-24ff0919",
+    "name": "MacArthur Park Lake",
+    "latitude": 34.058218,
+    "longitude": -118.27789,
+    "county": "Los Angeles",
+    "dfw_water_id": 7351,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 19.0
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KHHR",
+      "name": "Hawthorne, Hawthorne Municipal Airport",
+      "latitude": 33.92361,
+      "longitude": -118.33194,
+      "distance_miles": 9.8
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:19.061644+00:00"
+  },
+  {
+    "id": "rancho-simi-park-lake",
+    "name": "Rancho Simi Park Lake",
+    "latitude": 34.2665,
+    "longitude": -118.763836,
+    "county": "Ventura",
+    "dfw_water_id": 27440,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 13.5
+      }
+    ],
+    "approved": true,
+    "station_status": "unverified"
+  },
+  {
+    "id": "reseda-park-lake-6d89dadb",
+    "name": "Reseda Park Lake",
+    "latitude": 34.188596,
+    "longitude": -118.534234,
+    "county": "Los Angeles",
+    "dfw_water_id": 28292,
+    "cities": [
+      {
+        "id": "los-angeles",
+        "distance_miles": 3.5
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KVNY",
+      "name": "Van Nuys, Van Nuys Airport",
+      "latitude": 34.2125,
+      "longitude": -118.49083,
+      "distance_miles": 3.0
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:20.974124+00:00"
+  },
+  {
+    "id": "elk-grove-park-pond-08f22d69",
+    "name": "Elk Grove Park Pond",
+    "latitude": 38.395032,
+    "longitude": -121.37572,
+    "county": "Sacramento",
+    "dfw_water_id": 28309,
+    "cities": [
+      {
+        "id": "sacramento",
+        "distance_miles": 14.4
+      }
+    ],
+    "approved": true,
+    "station_status": "verified",
+    "station": {
+      "id": "KSAC",
+      "name": "Sacramento Executive Airport",
+      "latitude": 38.50674,
+      "longitude": -121.49597,
+      "distance_miles": 10.1
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:22.636501+00:00"
+  },
+  {
+    "id": "granite-park-pond-ca85eb8e",
+    "name": "Granite Park Pond",
+    "latitude": 38.543737,
+    "longitude": -121.40563,
+    "county": "Sacramento",
+    "dfw_water_id": 28287,
+    "cities": [
+      {
+        "id": "sacramento",
+        "distance_miles": 5.5
+      }
+    ],
+    "approved": true,
+    "station_status": "verified",
+    "station": {
+      "id": "KSAC",
+      "name": "Sacramento Executive Airport",
+      "latitude": 38.50674,
+      "longitude": -121.49597,
+      "distance_miles": 5.5
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:52:23.554487+00:00"
+  },
+  {
+    "id": "hagan-community-park-pond-249cf0df",
+    "name": "Hagan Community Park Pond",
+    "latitude": 38.605187,
+    "longitude": -121.308773,
+    "county": "Sacramento",
+    "dfw_water_id": 2507,
+    "cities": [
+      {
+        "id": "sacramento",
+        "distance_miles": 10.2
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KMHR",
+      "name": "Sacramento Mather Airport",
+      "latitude": 38.55996,
+      "longitude": -121.28397,
+      "distance_miles": 3.4
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:57:51.393271+00:00"
+  },
+  {
+    "id": "howe-community-park-lake-4dc4fa9a",
+    "name": "Howe Community Park Lake",
+    "latitude": 38.605747,
+    "longitude": -121.411883,
+    "county": "Sacramento",
+    "dfw_water_id": 28355,
+    "cities": [
+      {
+        "id": "sacramento",
+        "distance_miles": 4.8
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "KMHR",
+      "name": "Sacramento Mather Airport",
+      "latitude": 38.55996,
+      "longitude": -121.28397,
+      "distance_miles": 7.6
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:57:52.471008+00:00"
+  },
+  {
+    "id": "mather-lake",
+    "name": "Mather Lake",
+    "latitude": 38.556128,
+    "longitude": -121.253596,
+    "county": "Sacramento",
+    "dfw_water_id": 2753,
+    "cities": [
+      {
+        "id": "sacramento",
+        "distance_miles": 13.1
+      }
+    ],
+    "approved": true,
+    "station_status": "unverified"
+  },
+  {
+    "id": "southside-park-pond",
+    "name": "Southside Park Pond",
+    "latitude": 38.567586,
+    "longitude": -121.50294,
+    "county": "Sacramento",
+    "dfw_water_id": 28294,
+    "cities": [
+      {
+        "id": "sacramento",
+        "distance_miles": 1.1
+      }
+    ],
+    "approved": true,
+    "station_status": "unverified"
+  },
+  {
+    "id": "merced-lake-north",
+    "name": "Merced Lake North",
+    "latitude": 37.727309,
+    "longitude": -122.494671,
+    "county": "San Francisco",
+    "dfw_water_id": 4169,
+    "cities": [
+      {
+        "id": "san-francisco",
+        "distance_miles": 5.3
+      }
+    ],
+    "approved": true,
+    "station_status": "unverified"
+  },
+  {
+    "id": "temescal-lake-1f38e995",
+    "name": "Temescal Lake",
+    "latitude": 37.846412,
+    "longitude": -122.230369,
+    "county": "Alameda",
+    "dfw_water_id": 4018,
+    "cities": [
+      {
+        "id": "san-francisco",
+        "distance_miles": 11.4
+      }
+    ],
+    "approved": false,
+    "station_status": "verified",
+    "station": {
+      "id": "D3169",
+      "name": "DW3169 Oakland",
+      "latitude": 37.83213,
+      "longitude": -122.25003,
+      "distance_miles": 1.5
+    },
+    "reason": "usable recent pressure and wind",
+    "checked_at": "2026-10-21T19:57:54.017427+00:00"
+  }
+]

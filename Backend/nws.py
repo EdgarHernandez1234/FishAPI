@@ -8,9 +8,12 @@ NWS_HEADERS = {
     "User-Agent": "CSUNFreshwaterFishing/0.1",
     "Accept": "application/geo+json",
 }
+def average_pressure_hpa(readings: list[dict]) -> float | None:
+    values = [reading["value"] for reading in readings]
+    return round(sum(values) / len(values), 2) if values else None
 
 # Function to retrieve recent observations from a specific station
-def get_recent_observations(station_id: str, hours: int = 12) -> list[dict]:
+def get_recent_observations(station_id: str, hours: int = 3) -> list[dict]:
     end = datetime.now(timezone.utc)
     start = end - timedelta(hours=hours)
     url = f"https://api.weather.gov/stations/{station_id}/observations"
@@ -24,6 +27,34 @@ def get_recent_observations(station_id: str, hours: int = 12) -> list[dict]:
     response.raise_for_status()
     return response.json()["features"]
 
+def average_pressure_hpa(readings: list[dict]) -> float | None:
+    if not readings:
+        return None
+
+    return round(
+        sum(reading["value"] for reading in readings) / len(readings),
+        2,
+    )
+
+def extract_wind_readingst(observations):
+    readings = []
+
+    for observation in observations:
+        data = observation.get("properties", observation)
+        speed = data.get("windSpeed") or {}
+
+        if speed.get("value") is None:
+            continue
+
+        readings.append({
+            "timestamp": data["timestamp"],
+            "windSpeed": speed,
+            "windDirection": data.get("windDirection"),
+            "windGust": data.get("windGust"),
+        })
+
+    readings.sort(key=lambda reading: reading["timestamp"])
+    return readings
 
 def extract_pressure_readings(observations: list[dict]) -> list[dict]:
     readings = []
@@ -69,9 +100,11 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
 
     observations = get_recent_observations(station["id"], hours=12)
     readings = extract_pressure_readings(observations)
+    wind_readings = extract_wind_readings(observations)
+    return {
+        "status": "ok" if len(readings) >= 3 else "pressure_unavailable",
 
     result = {
-        "status": "pressure_unavailable",
         "spot": spot,
         "station": station,
         "pressureField": "barometricPressure",
@@ -79,6 +112,8 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
         "pressure_3h_ago_hpa": None,
         "change_hpa_3h": None,
         "readings": readings,
+        "windReadings": wind_readings,
+        "averagePressureHpa": average_pressure_hpa(readings),
     }
 
     if len(readings) < 2:
@@ -227,4 +262,14 @@ def get_wind_for_spot(spot: dict) -> dict:
 # Main execution block to demonstrate the usage of the functions
 if __name__ == "__main__":
     for spot in SPOTS:
+        result = get_pressure_data_for_spot(spot)
+        average = average_pressure_hpa(result["readings"])
+
+        print(
+            result["spot"]["name"],
+            "| status:", result["status"],
+            "| station:", result["station"]["id"] if result["station"] else None,
+            "| readings:", len(result["readings"]),
+            "| 3-hour average:", average, "hPa",
+        )
         print(get_hourly_forecast(spot))

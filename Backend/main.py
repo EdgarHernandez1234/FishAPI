@@ -1,14 +1,14 @@
+from datetime import datetime
+import time
 import json
 from pathlib import Path
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
-import time
-
-
 from nws import get_pressure_data_for_spot, get_hourly_forecast, precip_chance_now, get_wind_for_spot
 from spots import SPOTS
+from math import asin, cos, radians, sin, sqrt
+from cities import CITY_SEARCH_AREAS
 from core_factors.precipitation_scorer import score_precipitation
 from core_factors.season import score_season
 from core_factors.sky_scorer import score_sky
@@ -18,6 +18,15 @@ from location_dependent_factors.barometric_pressure_scorer import pressure_score
 from fishing_score import build_days, combine_scores
 from core_factors.water_temp_scorer import score_water_temp
 
+def distance_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    lat1, lon1, lat2, lon2 = map(radians, (lat1, lon1, lat2, lon2))
+    delta_lat = lat2 - lat1
+    delta_lon = lon2 - lon1
+    a = (
+        sin(delta_lat / 2) ** 2
+        + cos(lat1) * cos(lat2) * sin(delta_lon / 2) ** 2
+    )
+    return 2 * 3958.8 * asin(min(1, sqrt(a)))
 
 app = FastAPI()
 app.add_middleware(
@@ -71,9 +80,25 @@ def estimate_water_temps_c(lat: float, lon: float, past_days: int = 14,
     return result
 
 @app.get("/api/spots")
-def list_spots() -> list[dict]:
-    return ALL_SPOTS
+def list_spots(city: str | None = None) -> list[dict]:
+    if city is None:
+        return ALL_SPOTS
 
+    city_id = city.strip().lower().replace(" ", "-")
+    search_area = CITY_SEARCH_AREAS.get(city_id)
+
+    if search_area is None:
+        raise HTTPException(status_code=404, detail="City not supported yet")
+
+    return [
+        spot for spot in ALL_SPOTS
+        if distance_miles(
+            search_area["latitude"],
+            search_area["longitude"],
+            spot["latitude"],
+            spot["longitude"],
+        ) <= search_area["radius_miles"]
+    ]
 
 @app.get("/api/spots/{spot_id}/pressure")
 def get_spot_pressure(spot_id: str) -> dict:
