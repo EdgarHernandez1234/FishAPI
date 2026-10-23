@@ -473,6 +473,20 @@ button {
     color: var(--text-secondary);
 }
 
+#score-explanation {
+    margin-top: 14px;
+    max-width: 70ch;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.factor-explanation {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
 #Sub-Rating-Blocks { margin-top: 30px; }
 .rating { padding: 13px 0; }
 

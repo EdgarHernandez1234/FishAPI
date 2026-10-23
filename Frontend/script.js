@@ -4,6 +4,7 @@ const searchButton = searchForm.querySelector("button");
 const dateBlocks = document.getElementById("Date-Blocks");
 const overallRating = document.getElementById("overall-score");
 const ratingMessage = document.getElementById("rating-message");
+const scoreExplanation = document.getElementById("score-explanation");
 
 const weatherTemperature = document.getElementById("weather-temperature");
 const weatherRain = document.getElementById("weather-rain");
@@ -37,7 +38,7 @@ const communitySearch = document.getElementById("community-search");
 const communityCategory = document.getElementById("community-category");
 const communitySort = document.getElementById("community-sort");
 
-const factors = ["pressure", "temperature", "clouds", "rain", "surf", "moon"];
+const factors = ["pressure", "temperature", "clouds", "rain", "surf", "season", "moon"];
 
 /* ---------- backend connection (added) ---------- */
 
@@ -50,6 +51,7 @@ const factorMap = {
     clouds: "sky",
     rain: "precipitation",
     surf: "wind",
+    season: "season",
     moon: "moon"
 
 };
@@ -296,7 +298,7 @@ function processForecast(weather, scoreData) {
             bars[barId] = Number.isFinite(value) ? value / 10 : null;
         }
         const score = backendDay.score / 10;   // keeps one decimal
-        return {...day, score, rawScore: score, factors: bars};
+        return {...day, score, rawScore: score, factors: bars, explanation: backendDay.explanation};
     }).filter(Boolean);
 }
 
@@ -432,16 +434,22 @@ function updateMainRating(index) {
     overallRating.textContent = `${formatScore(day.score)}/10`;
     overallRating.style.color = getScoreColor(day.score);
     ratingMessage.textContent = getRatingMessage(day.score);
+    scoreExplanation.textContent = day.explanation?.summary ?? "A detailed explanation is unavailable for this forecast.";
 
     factors.forEach(factor => {
         const bar = document.getElementById(factor);
         if (!bar) return;
 
         const score = day.factors[factor];
+        const detail = document.getElementById(`${factor}-explanation`);
+        if (detail) {
+            detail.textContent = day.explanation?.factors?.[factorMap[factor]] ?? "Factor details unavailable.";
+        }
 
         // null means the backend had no data for this factor
         if (score === null || score === undefined) {
             bar.style.width = "0%";
+            bar.style.backgroundColor = "transparent";
             return;
         }
 

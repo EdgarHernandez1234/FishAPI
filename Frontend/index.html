@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Fisch Halloween Edition fishing forecasts and community">
-    <title>Fish | Halloween Edition</title>
+    <meta name="description" content="Fish or Treat | Fishoween Edition fishing forecasts and community">
+    <title>FISH or TREAT| Fishoween Edition</title>
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
 </head>
@@ -20,7 +20,7 @@
         <nav class="navbar">
             <div class="brand">
                 <span class="brand-icon">🎃</span>
-                <span>FISH or Treat</span>
+                <span>FISH or TREAT</span>
                 <span class="brand-edition">FISHOWEEN</span>
             </div>
             <button id="theme-toggle" type="button">
@@ -31,7 +31,7 @@
  
         <header class="hero">
             <div class="hero-decoration">🌕 🦇 🎃</div>
-            <div class="hero-badge">👻 HALLOWEEN EDITION</div>
+            <div class="hero-badge">👻 FISHOWEEN EDITION</div>
             <h1>Something's <span>Biting Tonight...</span></h1>
             <p>Discover fishing forecasts, find the best times to cast your line, and connect with fellow anglers.</p>
         </header>
@@ -77,32 +77,44 @@
                         <h1 id="overall-score">--/10</h1>
                         <h1 id="rating-message">Summoning the forecast...</h1>
                     </div>
+                    <p id="score-explanation" aria-live="polite">Score explanation will appear with the forecast.</p>
                 </section>
  
                 <section id="Sub-Rating-Blocks">
                     <div class="rating">
                         <h3>🧭 Pressure</h3>
                         <div class="bar"><div class="fill" id="pressure"></div></div>
+                        <p class="factor-explanation" id="pressure-explanation"></p>
                     </div>
                     <div class="rating">
                         <h3>🌡️ Water Temperature</h3>
                         <div class="bar"><div class="fill" id="temperature"></div></div>
+                        <p class="factor-explanation" id="temperature-explanation"></p>
                     </div>
                     <div class="rating">
                         <h3>☁️ Clouds</h3>
                         <div class="bar"><div class="fill" id="clouds"></div></div>
+                        <p class="factor-explanation" id="clouds-explanation"></p>
                     </div>
                     <div class="rating">
                         <h3>🌧️ Rain</h3>
                         <div class="bar"><div class="fill" id="rain"></div></div>
+                        <p class="factor-explanation" id="rain-explanation"></p>
                     </div>
                     <div class="rating">
                         <h3>💨 Wind</h3>
                         <div class="bar"><div class="fill" id="surf"></div></div>
+                        <p class="factor-explanation" id="surf-explanation"></p>
                     </div>
                     <div class="rating">
-                    <h3>🌕 Moon</h3>
-                    <div class="bar"><div class="fill" id="moon"></div></div>
+                        <h3>🍂 Season</h3>
+                        <div class="bar"><div class="fill" id="season"></div></div>
+                        <p class="factor-explanation" id="season-explanation"></p>
+                    </div>
+                    <div class="rating">
+                        <h3>🌕 Moon</h3>
+                        <div class="bar"><div class="fill" id="moon"></div></div>
+                        <p class="factor-explanation" id="moon-explanation"></p>
                     </div>
                 </section>
             </main>
@@ -270,7 +282,7 @@
                     <aside class="community-sidebar">
                         <div class="sidebar-card">
                             <div class="sidebar-icon">🎃</div>
-                            <h3>Welcome to Fisch!</h3>
+                            <h3>Welcome to FISH or TREAT!</h3>
                             <p>A place for anglers to share knowledge, discover fishing spots, and help each other catch more fish.</p>
                             <div class="community-stats">
                                 <div><strong id="total-posts">0</strong><span>Posts</span></div>
@@ -304,7 +316,7 @@
             <div class="footer-pumpkins">🎃 🦇 👻 🦇 🎃</div>
             <p>Made for anglers brave enough to fish after dark.</p>
             <p>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> and the <a href="https://www.weather.gov/" target="_blank" rel="noopener noreferrer">National Weather Service</a>. Fishing scores are weather-based estimates.</p>
-            <p class="footer-brand">FISCH — HALLOWEEN EDITION</p>
+            <p class="footer-brand">FISH or TREAT — FISHOWEEN EDITION</p>
         </footer>
     </div>
 </body>
