@@ -8,10 +8,6 @@ NWS_HEADERS = {
     "User-Agent": "CSUNFreshwaterFishing/0.1",
     "Accept": "application/geo+json",
 }
-def average_pressure_hpa(readings: list[dict]) -> float | None:
-    values = [reading["value"] for reading in readings]
-    return round(sum(values) / len(values), 2) if values else None
-
 # Function to retrieve recent observations from a specific station
 def get_recent_observations(station_id: str, hours: int = 3) -> list[dict]:
     end = datetime.now(timezone.utc)
@@ -36,7 +32,7 @@ def average_pressure_hpa(readings: list[dict]) -> float | None:
         2,
     )
 
-def extract_wind_readingst(observations):
+def extract_wind_readings(observations):
     readings = []
 
     for observation in observations:
@@ -84,7 +80,8 @@ def extract_pressure_readings(observations: list[dict]) -> list[dict]:
 
         readings.append({
             "timestamp": timestamp,
-            "pressure_hpa": value_hpa,
+            "value": value_hpa,
+            "unitCode": "wmoUnit:hPa",
         })
 
     return sorted(readings, key=lambda r: r["timestamp"])
@@ -101,10 +98,22 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
     observations = get_recent_observations(station["id"], hours=12)
     readings = extract_pressure_readings(observations)
     wind_readings = extract_wind_readings(observations)
-    return {
-        "status": "ok" if len(readings) >= 3 else "pressure_unavailable",
+    # Keep the public average limited to the most recent three hours.
+    average_readings = []
+    if readings:
+        latest_time = datetime.fromisoformat(
+            readings[-1]["timestamp"].replace("Z", "+00:00")
+        )
+        cutoff = latest_time - timedelta(hours=3)
+        average_readings = [
+            reading for reading in readings
+            if datetime.fromisoformat(
+                reading["timestamp"].replace("Z", "+00:00")
+            ) >= cutoff
+        ]
 
     result = {
+        "status": "ok" if len(readings) >= 3 else "pressure_unavailable",
         "spot": spot,
         "station": station,
         "pressureField": "barometricPressure",
@@ -113,8 +122,9 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
         "change_hpa_3h": None,
         "readings": readings,
         "windReadings": wind_readings,
-        "averagePressureHpa": average_pressure_hpa(readings),
+        "averagePressureHpa": average_pressure_hpa(average_readings),
     }
+    
 
     if len(readings) < 2:
         return result
@@ -145,11 +155,10 @@ def get_pressure_data_for_spot(spot: dict) -> dict:
     if abs(previous_time - target_time) > timedelta(minutes=90):
         return result
 
-    current_hpa = current["pressure_hpa"]
-    previous_hpa = previous["pressure_hpa"]
+    current_hpa = current["value"]
+    previous_hpa = previous["value"]
 
     result.update({
-        "status": "ok",
         "pressure_hpa": round(current_hpa, 2),
         "pressure_3h_ago_hpa": round(previous_hpa, 2),
         "change_hpa_3h": round(current_hpa - previous_hpa, 2),
