@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from nws import get_pressure_data_for_spot, get_hourly_forecast, precip_chance_now, get_wind_for_spot
 from spots import SPOTS
+from nws import get_hourly_pressure_forecast
 from math import asin, cos, radians, sin, sqrt
 from cities import CITY_SEARCH_AREAS
 from core_factors.precipitation_scorer import score_precipitation
@@ -15,7 +16,7 @@ from core_factors.sky_scorer import score_sky
 from core_factors.wind_scorer import score_wind
 from core_factors.time_of_day import score_time_of_day, get_sun_times
 from location_dependent_factors.barometric_pressure_scorer import pressure_scorer
-from fishing_score import build_days, combine_scores
+from fishing_score import build_days, combine_scores, get_pressure_change_for_day
 from core_factors.water_temp_scorer import score_water_temp
 
 def distance_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -340,18 +341,40 @@ def get_spot_score(spot_id: str) -> dict:
         water_by_date = {}
     water_scores = {d: score_water_temp(t) for d, t in water_by_date.items()}
 
-    days = build_days(periods, water_temp_scores=water_scores)
-  
-    # pressure only exists for right now, so it only goes on the first day
+    
+    # Get the hourly pressure forecast; pressure is optional.
     try:
-        change = get_pressure_data_for_spot(spot)["change_hpa_3h"]
-        if days and change is not None:
-            days[0]["factors"]["pressure"] = pressure_scorer(change)
-            days[0]["score"] = combine_scores(days[0]["factors"])
-    except (httpx.HTTPError, KeyError):
-        pass   # pressure is optional
+        hourly_pressure = get_hourly_pressure_forecast(spot)
+    except httpx.HTTPError as exc:
+        print(f"Hourly pressure forecast failed: {exc}")
+        hourly_pressure = {}
 
-    return {"spot": spot,
-            "water_temps_c": {d["date"]: round(water_by_date[d["date"]], 1)
-                              for d in days if d["date"] in water_by_date},
-            "water_temp_estimated": True, "days": days}
+    # Build the daily scores once.
+    days = build_days(
+        periods,
+        water_temp_scores=water_scores,
+    )
+
+    # Apply the pressure forecast separately to every day.
+    for day in days:
+        change = get_pressure_change_for_day(
+            hourly_pressure,
+            day["date"],
+        )
+
+        if change is not None:
+            day["factors"]["pressure"] = pressure_scorer(change)
+
+        # Recalculate using all available factors, including pressure.
+        day["score"] = combine_scores(day["factors"])
+
+    return {
+        "spot": spot,
+        "water_temps_c": {
+            d["date"]: round(water_by_date[d["date"]], 1)
+            for d in days
+            if d["date"] in water_by_date
+        },
+        "water_temp_estimated": True,
+        "days": days,
+    }

@@ -282,3 +282,28 @@ if __name__ == "__main__":
             "| 3-hour average:", average, "hPa",
         )
         print(get_hourly_forecast(spot))
+
+def get_hourly_pressure_forecast(spot: dict) -> dict[str, float]:
+    """Return hourly sea-level pressure forecasts, keyed by local time."""
+    response = httpx.get(
+        "https://api.open-meteo.com/v1/forecast",
+        params={
+            "latitude": spot["latitude"],
+            "longitude": spot["longitude"],
+            "hourly": "pressure_msl",
+            "forecast_days": 7,
+            "timezone": "America/Los_Angeles",
+        },
+        timeout=15.0,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+    times = data["hourly"]["time"]
+    pressures = data["hourly"]["pressure_msl"]
+
+    return {
+        timestamp: pressure
+        for timestamp, pressure in zip(times, pressures)
+        if pressure is not None
+    }
