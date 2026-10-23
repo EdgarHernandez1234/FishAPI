@@ -42,7 +42,7 @@ const factors = ["pressure", "temperature", "clouds", "rain", "surf", "season", 
 
 /* ---------- backend connection (added) ---------- */
 
-const API = "http://127.0.0.1:8000";
+const API = "https://fishscore.onrender.com";
 
 // bar id (from the HTML) -> factor name returned by the backend
 const factorMap = {
