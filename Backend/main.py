@@ -17,6 +17,7 @@ from core_factors.time_of_day import score_time_of_day, get_sun_times
 from location_dependent_factors.barometric_pressure_scorer import pressure_scorer
 from fishing_score import build_days, combine_scores
 from core_factors.water_temp_scorer import score_water_temp
+from Database.db import db, posts
 
 
 app = FastAPI()
