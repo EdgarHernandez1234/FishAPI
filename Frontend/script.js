@@ -79,23 +79,110 @@ async function getScoreData(spotId) {
     return response.json();
 }
 
-function fillSpotList() {
-    let list = document.getElementById("spot-list");
+/* ---------- search suggestions: fishing spots + California cities ---------- */
 
-    if (!list) {
-        list = document.createElement("datalist");
-        list.id = "spot-list";
-        searchInput.after(list);
-        searchInput.setAttribute("list", "spot-list");
+const citySuggestions = document.getElementById("city-suggestions");
+const cityCache = new Map();   // lowercase city name -> geocoding result
+let suggestionCities = [];
+let suggestionTimer;
+let suggestionRequestCounter = 0;
+
+// One datalist holds both: spots first, then cities that aren't already a spot name
+function fillSpotList() {
+    citySuggestions.innerHTML = "";
+    const seen = new Set();
+
+    const add = name => {
+        name = String(name);
+        const key = name.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        citySuggestions.append(new Option(name));
+    };
+
+    spots.forEach(spot => add(spotName(spot)));
+    suggestionCities.forEach(city => add(city.name));
+}
+
+async function getCities(query) {
+    const params = new URLSearchParams({name: query, count: 100, countryCode: "US", format: "json"});
+    const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`);
+    if (!response.ok) throw new Error("Could not look up that city.");
+
+    const data = await response.json();
+    const cities = [];
+    const names = new Set();
+
+    (data.results || [])
+        .filter(location => location.admin1 === "California")
+        .forEach(location => {
+            const key = location.name.toLowerCase();
+            if (names.has(key)) return;
+            names.add(key);
+            cities.push(location);
+            if (!cityCache.has(key)) cityCache.set(key, location);
+        });
+
+    return cities;
+}
+
+function findNearestSpot(latitude, longitude) {
+    let nearest = null;
+    let best = Infinity;
+
+    spots.forEach(spot => {
+        if (!Number.isFinite(spot.latitude) || !Number.isFinite(spot.longitude)) return;
+        const dLat = spot.latitude - latitude;
+        const dLon = (spot.longitude - longitude) * Math.cos(latitude * Math.PI / 180);
+        const distance = dLat * dLat + dLon * dLon;
+
+        if (distance < best) {
+            best = distance;
+            nearest = spot;
+        }
+    });
+
+    return nearest;
+}
+
+// Falls back to the closest fishing spot when the query is a city instead of a spot
+async function findSpotNearCity(query) {
+    const key = query.trim().toLowerCase();
+    let city = cityCache.get(key);
+
+    if (!city) {
+        const cities = await getCities(query.trim());
+        city = cities.find(item => item.name.toLowerCase() === key) || cities[0];
     }
 
-    list.innerHTML = "";
-    spots.forEach(spot => {
-        const option = document.createElement("option");
-        option.value = spotName(spot);
-        list.appendChild(option);
-    });
+    return city ? findNearestSpot(city.latitude, city.longitude) : null;
 }
+
+searchInput.addEventListener("input", () => {
+    clearTimeout(suggestionTimer);
+
+    const query = searchInput.value.trim();
+
+    if (query.length < 2) {
+        suggestionCities = [];
+        fillSpotList();
+        return;
+    }
+
+    suggestionTimer = setTimeout(async () => {
+        const requestId = ++suggestionRequestCounter;
+
+        try {
+            const cities = await getCities(query);
+            if (requestId !== suggestionRequestCounter) return;
+            suggestionCities = cities;
+        } catch {
+            suggestionCities = [];
+        }
+
+        fillSpotList();
+    }, 250);
+});
 
 function findSpot(query) {
     const q = query.trim().toLowerCase();
@@ -622,8 +709,8 @@ async function searchSpot(query) {
             fillSpotList();
         }
 
-        const spot = findSpot(query);
-        if (!spot) throw new Error("No fishing spot matches that name.");
+        const spot = findSpot(query) || await findSpotNearCity(query);
+        if (!spot) throw new Error("No fishing spot or California city matches that name.");
 
         const [scoreData, weather] = await Promise.all([
             getScoreData(spot.id),
@@ -678,7 +765,7 @@ searchForm.addEventListener("submit", event => {
     event.preventDefault();
     const query = searchInput.value.trim();
 
-    if (!query) return alert("Please enter a fishing spot name.");
+    if (!query) return alert("Please enter a fishing spot or city name.");
 
     searchSpot(query);
 });

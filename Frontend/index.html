@@ -39,7 +39,8 @@
         <form class="search-box" id="search-form">
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="city-search" placeholder="Search for a fishing spot..." aria-label="Search fishing spots" autocomplete="off" required>
+                <input type="text" id="city-search" placeholder="Search for a fishing spot or city..." aria-label="Search fishing spots or cities" autocomplete="off" list="city-suggestions" required>
+                <datalist id="city-suggestions"></datalist>
                 <button type="submit">Search 🎃</button>
             </div>
         </form>
