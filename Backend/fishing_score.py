@@ -8,6 +8,7 @@ from core_factors.wind_scorer import score_wind
 from core_factors.time_of_day import score_moon, score_time_of_day
 from astral import moon
 
+
 # placeholder weights: tune with your team
 WEIGHTS = {
     "precipitation": 0.25,
@@ -44,13 +45,34 @@ def wind_mph_from_period(period: dict) -> float | None:
     return sum(nums) / len(nums) if nums else None   # '5 to 10 mph' -> 7.5
 
 
+
+
 def combine_scores(factors: dict) -> int | None:
-    """Weighted average of the factors that have data (missing ones are skipped)."""
-    available = {k: v for k, v in factors.items() if v is not None}
+    """Calculate a weighted score and compress the high end."""
+    available = {
+        key: value
+        for key, value in factors.items()
+        if value is not None
+    }
+
     if not available:
         return None
-    total_weight = sum(WEIGHTS[k] for k in available)
-    return round(sum(v * WEIGHTS[k] for k, v in available.items()) / total_weight)
+
+    total_weight = sum(WEIGHTS[key] for key in available)
+
+    raw_score = sum(
+        value * WEIGHTS[key]
+        for key, value in available.items()
+    ) / total_weight
+
+    # Leave scores at or below 75 unchanged.
+    # Compress higher scores so 90+ is less common.
+    if raw_score <= 75:
+        calibrated_score = raw_score
+    else:
+        calibrated_score = 75 + (raw_score - 75) * 0.7
+
+    return round(max(0, min(100, calibrated_score)))
 
 
 def score_period(start: datetime, period: dict) -> dict:
@@ -69,16 +91,27 @@ def score_period(start: datetime, period: dict) -> dict:
 
 def build_days(periods: list[dict], max_days: int = 7, water_temp_scores: dict[str, int] | None = None) -> list[dict]:
     by_date = {}
+
     for period in periods:
         start = datetime.fromisoformat(period["startTime"])
         by_date.setdefault(start.date(), []).append((start, period))
 
     days = []
+
     for day in sorted(by_date)[:max_days]:
-        start, period = min(by_date[day], key=lambda e: abs(e[0].hour - TARGET_HOUR))
+        start, period = min(
+            by_date[day],
+            key=lambda e: abs(e[0].hour - TARGET_HOUR),
+        )
+
         factors = score_period(start, period)
-        factors["water_temp"] = (water_temp_scores or {}).get(day.isoformat())
+
+        factors["water_temp"] = (water_temp_scores or {}).get(
+            day.isoformat()
+        )
+
         score = combine_scores(factors)
+
         if score is not None:
             days.append({
                 "date": day.isoformat(), "score": score, "factors": factors,

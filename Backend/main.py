@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from nws import get_pressure_data_for_spot, get_hourly_forecast, precip_chance_now, get_wind_for_spot
 from spots import SPOTS
+from nws import get_hourly_pressure_forecast
 from math import asin, cos, radians, sin, sqrt
 from cities import CITY_SEARCH_AREAS
 from core_factors.precipitation_scorer import score_precipitation
