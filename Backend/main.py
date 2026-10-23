@@ -18,6 +18,8 @@ from location_dependent_factors.barometric_pressure_scorer import pressure_score
 from fishing_score import build_days, combine_scores
 from core_factors.water_temp_scorer import score_water_temp
 from Database.db import db, posts
+from Database import community
+from Database.models import PostCreate, CommentCreate, VoteRequest
 
 
 app = FastAPI()
@@ -27,7 +29,7 @@ app.add_middleware(
         "http://127.0.0.1:5500",
         "http://localhost:5500",
     ],
-    allow_methods=["GET"],
+    allow_methods=["GET","POST"],
     allow_headers=["*"],
 )
 
@@ -331,3 +333,28 @@ def get_spot_score(spot_id: str) -> dict:
             "water_temps_c": {d["date"]: round(water_by_date[d["date"]], 1)
                               for d in days if d["date"] in water_by_date},
             "water_temp_estimated": True, "days": days}
+
+@app.get("/api/posts")
+def get_posts() -> list[dict]:
+    return community.list_posts()
+
+
+@app.post("/api/posts", status_code=201)
+def create_post(post: PostCreate) -> dict:
+    return community.create_post(post.model_dump())
+
+
+@app.post("/api/posts/{post_id}/comments", status_code=201)
+def add_comment(post_id: str, comment: CommentCreate) -> dict:
+    result = community.add_comment(post_id, comment.model_dump())
+    if result is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return result
+
+
+@app.post("/api/posts/{post_id}/vote")
+def vote_on_post(post_id: str, body: VoteRequest) -> dict:
+    result = community.vote(post_id, body.direction, body.previous)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return result
