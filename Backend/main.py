@@ -4,6 +4,8 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+import time
+
 
 from nws import get_pressure_data_for_spot, get_hourly_forecast, precip_chance_now, get_wind_for_spot
 from spots import SPOTS
@@ -11,9 +13,10 @@ from core_factors.precipitation_scorer import score_precipitation
 from core_factors.season import score_season
 from core_factors.sky_scorer import score_sky
 from core_factors.wind_scorer import score_wind
-from core_factors.time import score_time_of_day, get_sun_times
+from core_factors.time_of_day import score_time_of_day, get_sun_times
 from location_dependent_factors.barometric_pressure_scorer import pressure_scorer
-
+from fishing_score import build_days, combine_scores
+from core_factors.water_temp_scorer import score_water_temp
 
 
 app = FastAPI()
@@ -30,6 +33,42 @@ app.add_middleware(
 cdfw_file = Path(__file__).with_name("cdfw_approved_spots.json")
 CDFW_SPOTS = json.loads(cdfw_file.read_text(encoding="utf-8"))
 ALL_SPOTS = SPOTS + CDFW_SPOTS
+
+_cache = {}               # (lat, lon) -> (saved_at, temperature in °C)
+CACHE_SECONDS = 3600
+
+
+def estimate_water_temps_c(lat: float, lon: float, past_days: int = 14,
+                           forecast_days: int = 7, k: float = 0.15) -> dict[str, float]:
+    """Estimated water temperature (°C) for each date, from past and forecast air temperatures."""
+    key = (round(lat, 3), round(lon, 3))
+    saved = _cache.get(key)
+    if saved and time.time() - saved[0] < CACHE_SECONDS:
+        return saved[1]
+
+    response = httpx.get(
+        "https://api.open-meteo.com/v1/forecast",
+        params={"latitude": lat, "longitude": lon, "daily": "temperature_2m_mean",
+                "past_days": past_days, "forecast_days": forecast_days, "timezone": "auto"},
+        timeout=15.0,
+    )
+    response.raise_for_status()
+    daily = response.json()["daily"]
+
+    water = None
+    result = {}
+    for date, air in zip(daily["time"], daily["temperature_2m_mean"]):
+        if air is None:
+            if water is None:
+                continue
+        elif water is None:
+            water = air
+        else:
+            water += k * (air - water)
+        result[date] = water
+
+    _cache[key] = (time.time(), result)
+    return result
 
 @app.get("/api/spots")
 def list_spots() -> list[dict]:
@@ -259,3 +298,35 @@ def get_spot_pressure_score(spot_id: str) -> dict:
         "score": pressure_scorer(change),
     }
 
+@app.get("/api/spots/{spot_id}/score")
+def get_spot_score(spot_id: str) -> dict:
+    spot = next((item for item in ALL_SPOTS if item["id"] == spot_id), None)
+    if spot is None:
+        raise HTTPException(status_code=404, detail="Spot not found")
+
+    try:
+        periods = get_hourly_forecast(spot)
+    except httpx.HTTPError:
+        raise HTTPException(status_code=502, detail="NWS request failed")
+
+    try:
+        water_by_date = estimate_water_temps_c(spot["latitude"], spot["longitude"])
+    except (httpx.HTTPError, KeyError):
+        water_by_date = {}
+    water_scores = {d: score_water_temp(t) for d, t in water_by_date.items()}
+
+    days = build_days(periods, water_temp_scores=water_scores)
+  
+    # pressure only exists for right now, so it only goes on the first day
+    try:
+        change = get_pressure_data_for_spot(spot)["change_hpa_3h"]
+        if days and change is not None:
+            days[0]["factors"]["pressure"] = pressure_scorer(change)
+            days[0]["score"] = combine_scores(days[0]["factors"])
+    except (httpx.HTTPError, KeyError):
+        pass   # pressure is optional
+
+    return {"spot": spot,
+            "water_temps_c": {d["date"]: round(water_by_date[d["date"]], 1)
+                              for d in days if d["date"] in water_by_date},
+            "water_temp_estimated": True, "days": days}

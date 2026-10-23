@@ -1,7 +1,7 @@
 import pytest
 from Backend.core_factors.wind_scorer import score_wind
 from Backend.core_factors.sky_scorer import score_sky
-from Backend.core_factors.time import score_time
+from Backend.core_factors.time_of_day import score_time
 from Backend.core_factors.season import score_season
 
 

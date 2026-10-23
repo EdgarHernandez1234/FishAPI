@@ -20,5 +20,73 @@
     "station_latitude": 34.01583,
     "station_longitude": -118.45139,
     "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "alondra-park-lake",
+    "name": "Alondra Park Lake",
+    "latitude": 33.882028,
+    "longitude": -118.334293,
+    "station_id": "KHHR",
+    "station_name": "Hawthorne, Hawthorne Municipal Airport",
+    "station_latitude": 33.92361,
+    "station_longitude": -118.33194,
+    "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "merced-lake-north",
+    "name": "Merced Lake North",
+    "latitude": 37.727309,
+    "longitude": -122.494671,
+    "station_id": "KSFO",
+    "station_name": "San Francisco, San Francisco International Airport",
+    "station_latitude": 37.61961,
+    "station_longitude": -122.36558,
+    "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "mather-lake",
+    "name": "Mather Lake",
+    "latitude": 38.556128,
+    "longitude": -121.253596,
+    "station_id": "KMHR",
+    "station_name": "Sacramento Mather Airport",
+    "station_latitude": 38.55996,
+    "station_longitude": -121.28397,
+    "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "southside-park-pond",
+    "name": "Southside Park Pond",
+    "latitude": 38.567586,
+    "longitude": -121.50294,
+    "station_id": "KSAC",
+    "station_name": "Sacramento Executive Airport",
+    "station_latitude": 38.50674,
+    "station_longitude": -121.49597,
+    "source": "CDFW Planting Locations"
+  },
+  {
+    "id": "elk-grove-park-pond-08f22d69",
+    "name": "Elk Grove Park Pond",
+    "latitude": 38.395032,
+    "longitude": -121.37572,
+    "station_id": "KSAC",
+    "station_name": "Sacramento Executive Airport",
+    "station_latitude": 38.50674,
+    "station_longitude": -121.49597,
+    "source": "CDFW Planting Locations",
+    "access_source": "https://www.cosumnescsd.gov/879/Elk-Grove-Park-Wildlife-Protection"
+  },
+  {
+    "id": "granite-park-pond-ca85eb8e",
+    "name": "Granite Park Pond",
+    "latitude": 38.543737,
+    "longitude": -121.40563,
+    "station_id": "KSAC",
+    "station_name": "Sacramento Executive Airport",
+    "station_latitude": 38.50674,
+    "station_longitude": -121.49597,
+    "source": "CDFW Planting Locations",
+    "access_source": "https://wildlife.ca.gov/Fishing-in-the-city/SAC"
   }
 ]
