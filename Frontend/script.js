@@ -683,7 +683,6 @@ searchForm.addEventListener("submit", event => {
     searchSpot(query);
 });
 
-const COMMUNITY_STORAGE_KEY = "fisch-community-posts-v1";
 const COMMUNITY_VOTES_KEY = "fisch-community-votes-v1";
 
 function loadStoredJSON(key, fallback) {
@@ -705,11 +704,91 @@ function saveStoredJSON(key, value) {
     }
 }
 
-let posts = loadStoredJSON(COMMUNITY_STORAGE_KEY, []);
+async function loadCommunityPosts() {
+    const response = await fetch(`${API}/api/posts`);
+
+    if (!response.ok) {
+        throw new Error("Unable to load community posts");
+    }
+
+    return await response.json();
+}
+
+async function saveCommunityPost(post) {
+    const response = await fetch(`${API}/api/posts`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: post.author,
+            title: post.title,
+            question_type: post.category,
+            question_body: post.content
+        })
+    });
+
+    const responseText = await response.text();
+
+    if (!response.ok) {
+        throw new Error(
+            `POST /api/posts failed (${response.status}): ${responseText}`
+        );
+    }
+
+    return responseText ? JSON.parse(responseText) : null;
+}
+
+async function addCommentToPost(postId, comment) {
+    const response = await fetch(`${API}/api/posts/${encodeURIComponent(postId)}/comments`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(comment)
+    });
+
+    if (!response.ok) {
+        throw new Error("Unable to save comment");
+    }
+
+    return await response.json();
+}
+
+async function voteForPost(postId, direction, previous) {
+    const response = await fetch(`${API}/api/posts/${encodeURIComponent(postId)}/vote`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ direction, previous })
+    });
+
+    if (!response.ok) {
+        throw new Error("Unable to save vote");
+    }
+
+    return await response.json();
+}
+
+let posts = [];
 let userVotes = loadStoredJSON(COMMUNITY_VOTES_KEY, {});
 
 if (!Array.isArray(posts)) posts = [];
 if (!userVotes || typeof userVotes !== "object" || Array.isArray(userVotes)) userVotes = {};
+
+async function initializeCommunity() {
+    try {
+        posts = await loadCommunityPosts();
+        if (!Array.isArray(posts)) posts = [];
+    } catch (error) {
+        console.error("Unable to load community posts:", error);
+        posts = [];
+        alert("Unable to load community posts. Make sure the backend is running.");
+    }
+
+    renderCommunity();
+}
 
 function generateId() {
     if (window.crypto?.randomUUID) return crypto.randomUUID();
@@ -766,26 +845,32 @@ function updateCommunityStats() {
     document.getElementById("post-count").textContent = `${getFilteredPosts().length} posts`;
 }
 
-function voteOnPost(postId, direction) {
+async function voteOnPost(postId, direction) {
     const post = posts.find(item => item.id === postId);
     if (!post) return;
 
     const previous = userVotes[postId] || 0;
-
-    if (previous === 1) post.upvotes = Math.max(0, post.upvotes - 1);
-    if (previous === -1) post.downvotes = Math.max(0, post.downvotes - 1);
-
     const next = previous === direction ? 0 : direction;
 
-    if (next === 1) post.upvotes++;
-    if (next === -1) post.downvotes++;
+    try {
+        const updatedPost = await voteForPost(postId, next, previous);
+        const index = posts.findIndex(item => item.id === postId);
 
-    if (next === 0) delete userVotes[postId];
-    else userVotes[postId] = next;
+        if (updatedPost && updatedPost.id) {
+            posts[index] = updatedPost;
+        } else {
+            posts = await loadCommunityPosts();
+        }
 
-    saveStoredJSON(COMMUNITY_STORAGE_KEY, posts);
-    saveStoredJSON(COMMUNITY_VOTES_KEY, userVotes);
-    renderCommunity();
+        if (next === 0) delete userVotes[postId];
+        else userVotes[postId] = next;
+
+        saveStoredJSON(COMMUNITY_VOTES_KEY, userVotes);
+        renderCommunity();
+    } catch (error) {
+        console.error("Unable to save vote:", error);
+        alert("Unable to save your vote.");
+    }
 }
 
 function renderComments(post, container) {
@@ -824,7 +909,7 @@ function renderComments(post, container) {
 
     form.append(author, content, submit);
 
-    form.addEventListener("submit", event => {
+    form.addEventListener("submit", async event => {
         event.preventDefault();
 
         const name = author.value.trim();
@@ -832,15 +917,24 @@ function renderComments(post, container) {
 
         if (!name || !message) return;
 
-        post.comments.push({
-            id: generateId(),
-            author: name,
-            content: message,
-            createdAt: Date.now()
-        });
+        try {
+            const updatedPost = await addCommentToPost(post.id, {
+                author: name,
+                content: message
+            });
 
-        if (saveStoredJSON(COMMUNITY_STORAGE_KEY, posts)) {
+            const index = posts.findIndex(item => item.id === post.id);
+
+            if (updatedPost && updatedPost.id) {
+                posts[index] = updatedPost;
+            } else {
+                posts = await loadCommunityPosts();
+            }
+
             renderCommunity(post.id);
+        } catch (error) {
+            console.error("Unable to save comment:", error);
+            alert("Unable to save your comment.");
         }
     });
 
@@ -910,7 +1004,7 @@ function renderCommunity(openPostId = null) {
     updateCommunityStats();
 }
 
-postForm.addEventListener("submit", event => {
+postForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     const author = document.getElementById("post-author").value.trim();
@@ -921,7 +1015,6 @@ postForm.addEventListener("submit", event => {
     if (!author || !title || !content) return;
 
     const post = {
-        id: generateId(),
         author,
         title,
         category,
@@ -932,14 +1025,18 @@ postForm.addEventListener("submit", event => {
         comments: []
     };
 
-    posts.unshift(post);
+    try {
+        await saveCommunityPost(post);
+        posts = await loadCommunityPosts();
 
-    if (saveStoredJSON(COMMUNITY_STORAGE_KEY, posts)) {
         postForm.reset();
         communitySearch.value = "";
         communityCategory.value = "all";
         communitySort.value = "newest";
         renderCommunity();
+    } catch (error) {
+        console.error("Unable to save community post:", error);
+        alert("Unable to save your post. Make sure the backend is running.");
     }
 });
 
@@ -947,7 +1044,7 @@ communitySearch.addEventListener("input", () => renderCommunity());
 communityCategory.addEventListener("change", () => renderCommunity());
 communitySort.addEventListener("change", () => renderCommunity());
 
-renderCommunity();
+initializeCommunity();
 
 setInterval(() => {
     refreshWeather();
