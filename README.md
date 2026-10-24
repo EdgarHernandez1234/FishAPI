@@ -144,4 +144,4 @@ This project was created collaboratively as part of a hackathon.
 
 ## Demo Video
 
-[Add your demo video link here]
+https://youtu.be/bOBCmlpe0yk
